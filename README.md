@@ -4,7 +4,7 @@
 
 ## What is this?
 
-this is a quick & dirty docker-webhosting solution.
+this is a quick & dirty docker-webhosting solution with automated backup functionality
 
 ## How to use
 
