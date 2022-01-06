@@ -1,0 +1,116 @@
+version: '2.1'
+services:
+  mariadb:
+    image: bitnami/mariadb:latest
+    container_name: ${STACKNAME}_mariadb
+    networks:
+      - prestashopnet
+    environment:
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_PASSWORD=${DB_PASS}
+      - MARIADB_DATABASE=${DB_DATABASE}
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+  memcached:
+    image: 'bitnami/memcached:latest'
+    container_name: ${STACKNAME}_memcached
+    environment:
+      - MEMCACHED_CACHE_SIZE=512
+      - MEMCACHED_MAX_CONNECTIONS=2000
+      - MEMCACHED_THREADS=4
+    networks:
+      - prestashopnet
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+  prestashop2:
+    image: docker.io/bitnami/prestashop:1.7
+    container_name: ${STACKNAME}_prestashop
+    networks:
+      services-net:
+        aliases:
+          - prestashop2
+      prestashopnet:
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    environment:
+      - SERVER_NAME=${HOSTNAME}
+      - PRESTASHOP_FIRST_NAME=${P_FIRST_NAME}
+      - PRESTASHOP_LAST_NAME=${P_LAST_NAME}
+      - PRESTASHOP_PASSWORD=${P_PASSWORD}
+      - PRESTASHOP_EMAIL=${P_EMAIL}
+      - PRESTASHOP_HOST=${HOSTNAME}
+      - PRESTASHOP_DATABASE_HOST=mariadb
+      - PRESTASHOP_ENABLE_HTTPS=yes
+      - PRESTASHOP_LANGUAGE=${P_LANGUAGE}
+      - PRESTASHOP_COUNTRY=${P_COUNTRY}
+      - PRESTASHOP_SKIP_BOOTSTRAP=no
+      - PHP_MAX_EXECUTION_TIME=800
+      - PHP_MEMORY_LIMIT=1024M
+      - PHP_ENABLE_OPCACHE=yes
+      - PRESTASHOP_DATABASE_USER=${DB_USER}
+      - PRESTASHOP_DATABASE_NAME=${DB_DATABASE}
+      - PRESTASHOP_DATABASE_PASSWORD=${DB_PASS}
+    volumes:
+      - 'prestashop_data:/bitnami'
+    depends_on:
+      - mariadb
+    labels:
+      - "bunkerized-nginx.SERVER_NAME=${HOSTNAME}"            # replace with your domain
+      - "bunkerized-nginx.AUTO_LETS_ENCRYPT=${AUTO_LETS_ENCRYPT}"
+      - "bunkerized-nginx.USE_LETS_ENCRYPT_STAGING=${USE_LETS_ENCRYPT_STAGING}"
+      - "bunkerized-nginx.USE_REVERSE_PROXY=yes"
+      - "bunkerized-nginx.REVERSE_PROXY_URL=/"
+      - "bunkerized-nginx.REVERSE_PROXY_HOST=https://${STACKNAME}_prestashop:8443"
+      #- "bunkerized-nginx.REDIRECT_HTTP_TO_HTTPS=yes"
+      # Adding this label means this container should be stopped while it's being backed up:
+      #- "docker-volume-backup.stop-during-backup=true"
+      # These commands will be exec'd (in the same container) before/after the backup starts:
+      - docker-volume-backup.exec-pre-backup=mysqldump --protocol=TCP --host ${STACKNAME}_mariadb -P 3306 --routines --triggers --user=${DB_USER} --password=${DB_PASS} -r /bitnami/prestashop/${DB_DATABASE}.sql ${DB_DATABASE} 
+      - docker-volume-backup.exec-post-backup=rm -rfv "/bitnami/prestashop/${DB_DATABASE}.sql"
+    #mem_limit: 500m
+  backup:
+    image: futurice/docker-volume-backup:2.0.0
+    container_name: ${STACKNAME}_backup
+    networks:
+      prestashopnet:
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "2"
+        max-size: "5m"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Allow use of the "pre/post exec" feature /opt/bitnami/mariadb/tmp/mysql.sock
+      - prestashop_data:/backup/bitnami:ro       # Mount the temp space so it gets backed up
+      - ./backups:/archive                      # Mount a local folder as the backup archive
+      #- ~/.ssh/id_rsa:/ssh/id_rsa:ro            # Mount the SSH private key (as read-only)
+    environment:
+      - "BACKUP_FILENAME=backup-${STACKNAME}-%Y-%m-%dT%H-%M-%S.tar.gz"
+      #- "BACKUP_CRON_EXPRESSION=34 * * * *"
+      - "BACKUP_CRON_EXPRESSION=@daily"
+      #- "SCP_HOST=192.168.0.42"
+      #- "SCP_USER=pi"
+      #- "SCP_DIRECTORY: /home/pi/backups"           # Remote host directory
+volumes:
+  mariadb_data:
+    driver: local
+  prestashop_data:
+    driver: local
+
+networks:
+  services-net:
+    external:
+      name: services-net
+  prestashopnet:
