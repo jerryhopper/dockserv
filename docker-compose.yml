@@ -10,7 +10,7 @@ services:
       - 443:8443
     volumes:
       - bunkerized-certs:/etc/letsencrypt
-      - ./bunker/www:/www:ro
+      #- ./www:/www:ro
       - bunkerized-vol:/etc/nginx
     environment:
       - SERVER_NAME=${SERVER_NAME}
