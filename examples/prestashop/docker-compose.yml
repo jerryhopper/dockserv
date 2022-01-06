@@ -82,7 +82,7 @@ services:
       - docker-volume-backup.exec-post-backup=rm -rfv "/bitnami/prestashop/${DB_DATABASE}.sql"
     #mem_limit: 500m
   backup:
-    image: futurice/docker-volume-backup:2.5.0
+    image: futurice/docker-volume-backup:2.3.0
     container_name: ${STACKNAME}_backup
     networks:
       prestashopnet:
