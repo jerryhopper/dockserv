@@ -2,7 +2,7 @@
 
 
 
-## What is this?
+### What is this?
 
 This is a quick & dirty docker-webhosting solution with extra security provided by bunkerized nginx. i am sometimes in need of setting up some application on a small vps, vm or baremetal server - and needed a extra layer of security.
 
@@ -27,6 +27,6 @@ We now have the reverse-proxy up and running, lets start a website!
 
 Go to the Examples/ directory, and choose the application you like to start - Checkout the prestashop example.
 
-### Setting up a application behind the reverse proxy
+## Setting up a application behind the reverse proxy
 
 .
