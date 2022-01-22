@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  myapp1:
+     image: php:7.1-fpm-buster
+     restart: always
+     networks:
+       services-net:
+         aliases:
+           - myapp1
+     volumes:
+       - ./public_html:/app
+     labels:
+       - "bunkerized-nginx.SERVER_NAME=app1.example.com" # replace with your domain
+       - "bunkerized-nginx.REMOTE_PHP=myapp1"
+       - "bunkerized-nginx.REMOTE_PHP_PATH=/app"
+
+
+
+
+networks:
+  services-net:
+    external:
+      name: services-net
