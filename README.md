@@ -8,6 +8,7 @@ This is a quick & dirty docker-webhosting solution with extra security provided 
 
 The extra security comes from the very flexible and configurable bunkerized nginx images. Ratelimiting, Badbehaviour, Modsecurity and crowdsec will help to protect your website from bad actors spending your precious resources. More info on bunkerized nginx can be found here : https://github.com/bunkerity/bunkerized-nginx 
 
+Setting up certain applications can be tricky, and need special configuration tweaks. This repository with examples should make it easier to deploy these applications.
 
 
 ## How to use/setup the reverse proxy
@@ -33,7 +34,7 @@ Go to the Examples/ directory, and choose the application you like to start - Ch
 ## Setting up a application behind the reverse proxy
 
 
-In the example directory there are several examples.
+In the example directory there are several examples, preconfigured to work out of the box.
 
 
  - examples/php-fpm-simple/  a simple example of a minimalistic php-fpm application
