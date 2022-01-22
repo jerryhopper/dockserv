@@ -29,4 +29,7 @@ Go to the Examples/ directory, and choose the application you like to start - Ch
 
 ## Setting up a application behind the reverse proxy
 
-.
+
+In the example directory there are several examples.
+
+
