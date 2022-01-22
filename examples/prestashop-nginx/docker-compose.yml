@@ -23,7 +23,7 @@ services:
       - ./server-confs:/server-confs:ro         # custom confs at server context for prestashop
       - ./modsec-confs:/modsec-confs:ro         # avoid some FP with CRS
     labels:
-      - bunkerized-nginx.SERVER_NAME=${HOSTNAME}
+      - bunkerized-nginx.SERVER_NAME=beststout.com
       - bunkerized-nginx.USE_REVERSE_PROXY=yes
       - bunkerized-nginx.REVERSE_PROXY_URL=/
       - bunkerized-nginx.REVERSE_PROXY_HOST=https://mywww:8443
@@ -101,18 +101,6 @@ services:
       - MYSQL_PASSWORD=${DB_PASS}              # replace with a stronger password (must match DB_PASSWD)
     networks:
       - prestashopnet
-
-  #app2:
-  #  image: phpmyadmin:apache
-  #  #restart: never
-  #  environment:
-  #    - PMA_ARBITRARY=1
-  #    - PMA_ABSOLUTE_URI=http://pma.beststout.com:8888
-  #  ports:
-  #    - 8888:80
-  #  networks:
-  #    - prestashopnet
-
 
 networks:
   services-net:
