@@ -33,3 +33,11 @@ Go to the Examples/ directory, and choose the application you like to start - Ch
 In the example directory there are several examples.
 
 
+ - examples/php-fpm-simple/  a simple example of a minimalistic php-fpm application
+ - examples/prestashop-apache/  a example using the bitnami-prestashop container.
+ - examples/prestashop-nginx/   a example using the prestashop-fpm container.
+
+
+
+
+
