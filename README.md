@@ -37,7 +37,7 @@ Go to the Examples/ directory, and choose the application you like to start - Ch
 In the example directory there are several examples, preconfigured to work out of the box.
 
 
- - examples/php-fpm-simple/  a simple example of a minimalistic php-fpm application
+ - [examples/php-fpm-simple/](https://github.com/jerryhopper/dockserv/tree/master/examples/php-fpm-simple)  a simple example of a minimalistic php-fpm application
  - examples/prestashop-apache/  a example using the bitnami-prestashop container.
  - examples/prestashop-nginx/   a example using the prestashop-fpm container.
 
