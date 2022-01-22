@@ -1,0 +1,121 @@
+version: '3'
+
+services:
+
+  mywww:
+    image: bunkerity/bunkerized-nginx
+    restart: always
+    depends_on:
+      - myprestashop
+    #ports:
+    #  - 80:8080
+    #  - 443:8443
+    networks:
+      services-net:
+         aliases:
+          - mywww
+      prestashopnet:
+
+
+    volumes:
+      - /home/jerryhopper/prestashop/public_html:/www:ro
+      #- ./letsencrypt:/etc/letsencrypt
+      - ./server-confs:/server-confs:ro         # custom confs at server context for prestashop
+      - ./modsec-confs:/modsec-confs:ro         # avoid some FP with CRS
+    labels:
+      - bunkerized-nginx.SERVER_NAME=${HOSTNAME}
+      - bunkerized-nginx.USE_REVERSE_PROXY=yes
+      - bunkerized-nginx.REVERSE_PROXY_URL=/
+      - bunkerized-nginx.REVERSE_PROXY_HOST=https://mywww:8443
+      - "bunkerized-nginx.GENERATE_SELF_SIGNED_SSL=yes"
+      - "bunkerized-nginx.AUTO_LETS_ENCRYPT=no"
+
+    environment:
+      - SERVER_NAME=beststout.com             # replace with your domain
+      - AUTO_LETS_ENCRYPT=no
+      - REDIRECT_HTTP_TO_HTTPS=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - MAX_CLIENT_SIZE=50m
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - REMOTE_PHP=myprestashop
+      - REMOTE_PHP_PATH=/var/www/html
+      - LIMIT_REQ_RATE=5r/s
+      - LIMIT_REQ_BURST=10
+      - GENERATE_SELF_SIGNED_SSL=yes
+      - USE_WHITELIST_IP=yes
+      - WHITELIST_IP_LIST=141.224.243.79
+      - USE_MODSECURITY=yes
+      - USE_BAD_BEHAVIOR=no
+      - USE_MODSECURITY_CRS=no
+  myprestashop:
+    image: prestashop/prestashop:1.7-fpm
+    restart: always
+    volumes:
+      - /home/jerryhopper/prestashop/public_html:/var/www/html
+      #- /home/jerryhopper/prestashop/public_html:/var/www/html
+    networks:
+      prestashopnet:
+    environment:
+      - DB_SERVER=mariadb
+      - DB_NAME=${DB_DATABASE}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASS}                      # replace with a stronger password (must match MYSQL_PASSWORD)
+      - PS_INSTALL_AUTO=0
+      - PS_DOMAIN=beststout.com                 # replace with your domain
+      - PS_FOLDER_ADMIN=admin-123                  # replace with your admin folder
+      - PS_ENABLE_SSL=1
+      - ADMIN_MAIL=admin@example.com             # replace with your mail
+      - ADMIN_PASSWD=admin                       # replace with a stronger password
+
+
+
+
+
+  memcached:
+    image: 'bitnami/memcached:latest'
+    container_name: ${STACKNAME}_memcached
+    restart: always
+    environment:
+      - MEMCACHED_CACHE_SIZE=512
+      - MEMCACHED_MAX_CONNECTIONS=2000
+      - MEMCACHED_THREADS=4
+    networks:
+      - prestashopnet
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+
+
+  mariadb:
+    image: mariadb
+    restart: always
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}         # replace with a stronger password
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASS}              # replace with a stronger password (must match DB_PASSWD)
+    networks:
+      - prestashopnet
+
+  #app2:
+  #  image: phpmyadmin:apache
+  #  #restart: never
+  #  environment:
+  #    - PMA_ARBITRARY=1
+  #    - PMA_ABSOLUTE_URI=http://pma.beststout.com:8888
+  #  ports:
+  #    - 8888:80
+  #  networks:
+  #    - prestashopnet
+
+
+networks:
+  services-net:
+    external: true
+  prestashopnet:
+
