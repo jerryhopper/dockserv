@@ -19,6 +19,8 @@ Edit the file, and save it.
 
 ``nano .env``
 
+### the reverse proxy
+
 Run the following command to start the reverse proxy server (Bunkerized-nginx)
 
 ``sudo ./docker-compose up -d``
@@ -27,3 +29,6 @@ We now have the reverse-proxy up and running, lets start a website!
 
 Go to the Examples/ directory, and choose the application you like to start - Checkout the prestashop example.
 
+### Setting up a application behind the reverse proxy
+
+.
