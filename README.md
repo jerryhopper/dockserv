@@ -6,6 +6,9 @@
 
 This is a quick & dirty docker-webhosting solution with extra security provided by bunkerized nginx. i am sometimes in need of setting up some application on a small vps, vm or baremetal server - and needed a extra layer of security.
 
+The extra security comes from the very flexible and configurable bunkerized nginx images. Ratelimiting, Badbehaviour, Modsecurity and crowdsec will help to protect your website from bad actors spending your precious resources. More info on bunkerized nginx can be found here : https://github.com/bunkerity/bunkerized-nginx 
+
+
 
 ## How to use/setup the reverse proxy
 
