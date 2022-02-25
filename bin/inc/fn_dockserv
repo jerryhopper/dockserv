@@ -42,11 +42,6 @@ dockserv_install_ds_traefik() {
 dockserv_install() {
   info "inc/fn_dockserv - dockserv_ install"
 
-  if [ ! -f ~/.ssh/id_rsa ];then
-    notice "For the backupfunctionality to work, a SSH connection is required."
-    warn "No key found in ~/.ssh/id_rsa"
-    ssh-keygen
-  fi
 
 
   if [ ! -f ~/.ssh/.dockserv]; then
@@ -81,7 +76,7 @@ dockserv_install() {
     echo "SCP_USER=$SCP_USER"> ~/.ssh/.dockserv
     echo "SCP_HOST=$SCP_HOST">> ~/.ssh/.dockserv
     echo "SCP_PORT=$SCP_PORT">> ~/.ssh/.dockserv
-    echo "SCP_DIRECTORY=/backupstorage/backup-storage/$(hostname)/">> ~/.ssh/.dockserv
+    echo "SCP_DIRECTORY=$SCP_DIRECTORY">> ~/.ssh/.dockserv
 
     #SCP_HOST=141.224.243.79
     #SCP_PORT=2222
@@ -98,6 +93,11 @@ dockserv_install() {
   dockserv_install_ds_mariadb "$1"
 
 
+  if [ ! -f ~/.ssh/id_rsa ];then
+    warn "No key found in ~/.ssh/id_rsa"
+    ssh-keygen
+    notice "Copy the public key to your SSH server. "
+  fi
 
 
 }

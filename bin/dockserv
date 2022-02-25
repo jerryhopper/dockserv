@@ -44,6 +44,10 @@ if [ -f ~/.ssh/.dockserv ]; then
 
 fi
 
+# df  ~/|awk 'FNR == 2{print $2}'  # total
+# df  ~/|awk 'FNR == 2{print $3}'  # used
+# df  ~/|awk 'FNR == 2{print $4}'  # free
+# df  ~/|awk 'FNR == 2{print $5}'  # %
 
 
 #notice "notice"
