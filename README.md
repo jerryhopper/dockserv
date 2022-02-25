@@ -9,4 +9,4 @@ This is a quick & dirty docker-webhosting solution with extra security. i am som
 
 ### Quick install
 
-curl -L https://github.com/jerryhopper/dockserv/archive/refs/tags/0.0.2.tar.gz | tar -xzv  && bash dockserv-0.0.2/setup.sh
+  curl -L https://github.com/jerryhopper/dockserv/archive/refs/tags/0.0.2.tar.gz | tar -xzv  && bash dockserv-0.0.2/setup.sh
