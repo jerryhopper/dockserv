@@ -1,0 +1,178 @@
+
+usage() {
+  echo ""
+  echo "Usage: dockserv <options>"
+  echo ""
+  echo " dockserv [-c <app>] [-b] [-d <folder>] [-R]"
+
+  echo "  -c <application> : the CREATE flag. example:  -c <prestashop|wordpress>"
+  echo "  -b : the BACKUP flag. "
+  echo "  -d <directory> : the DIRECTORY flag. if -d is not specified, the current directory will be assumed."
+  echo "  -R : the REMOVAL flag. "
+  echo "  -F : Force 'yes' on all input. (allows removal without interaction)"
+  echo "  -i <backupfile> : Import backupfile "
+  echo "  -h <hostname> : specifies hostname to use: mydomain.com or mydomain.com,www.myotherdomain.com"
+  echo ""
+  echo " Installation:"
+  echo "   dockserv install email@ddr.es  <-F>"
+  echo "   dockserv uninstall <-F>"
+  echo ""
+  echo "   dockserv downloadbackup  - Allows downloading backupfiles from backup archive"
+
+
+
+  exit 1;
+}
+
+
+compose_loggingblock(){
+   echo "    logging:" >>$1
+   echo "      driver: \"json-file\"" >>$1
+   echo "      options:" >>$1
+   echo "        max-file: \"5\" " >>$1
+   echo "        max-size: \"10m\" " >>$1
+}
+
+compose_document(){
+   echo "version: '3'" >$1
+   echo "" >>$1
+   echo "services:" >>$1
+
+}
+
+compose_dotenv(){
+  error "inc/fn_compose  compose_dotenv()"
+  #error "STACKNAME=$STACKNAME"
+  #error "DOCKSERVE_STACK=$DOCKSERVE_STACK"
+  #exit
+  # call the stack specific envfunction
+  "stack_${DOCKSERVE_STACK}_fn_create_env"
+
+  # Append dockserv stuff.
+  echo "DOCKSERVE_STACK=${DOCKSERVE_STACK}">>$STACKDIR/.env
+  echo "DOCKSERVE_BACKUP_FOLDER=${DOCKSERVE_BACKUP_FOLDER}">>$STACKDIR/.env
+  echo "DOCKSERVE_DB=${DOCKSERVE_DB}">>$STACKDIR/.env
+
+
+}
+
+
+compose_networks(){
+   echo "networks:" >>$1
+   echo "  ds-proxy-net:" >>$1
+   echo "    external: true" >>$1
+
+}
+
+
+
+
+
+
+
+compose_traefik_labels(){
+
+#echo "HOSTNAME0 = ${HOSTNAME0}"
+#echo "HOSTNAME1 = ${HOSTNAME1}"
+#echo "PROJECTNAME = ${PROJECTNAME}"
+#echo "STACKNAME = ${STACKNAME}"
+
+    # GET HOSTNAMES
+
+
+  # ds_traefik_labels "THE_COMPOSE_FILE" "STACKNAME" "HOSTNAME" "HOSTNAME2" "nossl"
+
+  declare -r THE_COMPOSE_FILE=$1
+
+  if [ ! -f $THE_COMPOSE_FILE ]; then
+    echo "docker-compose.yml not found!"
+    exit
+  fi
+
+  #STACKNAME=$2
+  if [ "" == "$STACKNAME" ]; then
+    echo "STACKNAME empty!"
+    exit
+  fi
+#echo "STACKNAME = ${STACKNAME}"
+  SSL=0
+  #HOSTNAME0=$3
+  if [ "" == "$HOSTNAME0" ]; then
+    echo "HOSTNAMEempty!"
+    exit
+  elif [ "nossl" == "$HOSTNAME0" ];then
+    echo "FATAL: Missing hostname!"
+  elif [ "ssl" == "$HOSTNAME0" ]; then
+    echo "FATAL: Missing hostname!"
+  fi
+
+  if [ "nossl" == "$4" ];then
+    tSSL=0
+  elif [ "ssl" == "$4" ];then
+    tSSL=1
+  fi
+  if [ "nossl" == "$5" ];then
+    tSSL=0
+  elif [ "ssl" == "$5" ];then
+    tSSL=1
+  fi
+  declare -r SSL=$tSSL
+
+
+
+#echo "STACKNAME: $STACKNAME"
+
+  #HOSTNAME1=$4
+
+
+
+  echo "      - traefik.enable=true">>$THE_COMPOSE_FILE
+  echo "      - traefik.http.middlewares.crowdsec-bouncer.forwardauth.address=http://bouncer:8080/api/v1/forwardAuth">>$THE_COMPOSE_FILE
+
+  if [ "$HOSTNAME1" == "" ];then
+    echo "      - traefik.http.routers.\${STACKNAME}_http.rule=Host(\`\${HOSTNAME0}\`)">>$THE_COMPOSE_FILE
+  else
+    echo "      - traefik.http.routers.\${STACKNAME}_http.rule=Host(\`\${HOSTNAME0}\`) || Host(\`\${HOSTNAME1}\`) ">>$THE_COMPOSE_FILE
+  fi
+
+
+
+  echo "      - traefik.http.routers.\${STACKNAME}_http.entrypoints=http">>$THE_COMPOSE_FILE
+  echo "      - traefik.http.routers.\${STACKNAME}_http.service=\${STACKNAME}_http@docker">>$THE_COMPOSE_FILE
+  echo "      - traefik.http.services.\${STACKNAME}_http.loadbalancer.server.port=${DOCKSERVE_STACKPORT}">>$THE_COMPOSE_FILE
+
+
+  if [ "$SSL" == "1" ];then
+    echo "      - traefik.http.routers.\${STACKNAME}_http.middlewares=\${STACKNAME}-redirectscheme">>$THE_COMPOSE_FILE
+
+    echo "      - traefik.http.middlewares.\${STACKNAME}-redirectscheme.redirectscheme.scheme=https">>$THE_COMPOSE_FILE
+    echo "      - traefik.http.middlewares.\${STACKNAME}-redirectscheme.redirectscheme.permanent=true">>$THE_COMPOSE_FILE
+
+    echo "      - traefik.http.routers.\${STACKNAME}_https.entrypoints=https">>$THE_COMPOSE_FILE
+
+
+    if [ "$HOSTNAME1" == "" ];then
+      echo "      - traefik.http.routers.\${STACKNAME}_https.rule=Host(\`\${HOSTNAME0}\`)">>$THE_COMPOSE_FILE
+    else
+      echo "      - traefik.http.routers.\${STACKNAME}_https.rule=Host(\`\${HOSTNAME0}\`) || Host(\`\${HOSTNAME1}\`)">>$THE_COMPOSE_FILE
+    fi
+
+    echo "      - traefik.http.routers.\${STACKNAME}_https.service=\${STACKNAME}_https">>$THE_COMPOSE_FILE
+    echo "      - traefik.http.routers.\${STACKNAME}_https.tls=true">>$THE_COMPOSE_FILE
+    echo "      - traefik.http.routers.\${STACKNAME}_https.tls.certresolver=http">>$THE_COMPOSE_FILE
+    echo "      - traefik.http.routers.\${STACKNAME}_https.tls.domains[0].main=\${HOSTNAME0}">>$THE_COMPOSE_FILE
+
+    if [ "$HOSTNAME1" != "" ];then
+      echo "      - traefik.http.routers.\${STACKNAME}_https.tls.domains[0].sans=\${HOSTNAME1}">>$THE_COMPOSE_FILE
+    fi
+
+    echo "      - traefik.http.services.\${STACKNAME}_https.loadbalancer.server.port=${DOCKSERVE_STACKPORT}">>$THE_COMPOSE_FILE
+
+    echo "      - traefik.docker.network=ds-proxy-net">>$THE_COMPOSE_FILE
+
+    echo "      - traefik.http.middlewares.testheader.headers.sslProxyHeaders.X-Scheme=https">>$THE_COMPOSE_FILE
+    echo "      - traefik.http.middlewares.testheader.headers.customrequestheaders.X-Scheme=https">>$THE_COMPOSE_FILE
+    echo "      - traefik.http.middlewares.testheader.headers.customrequestheaders.X-Forwarded-Proto=https">>$THE_COMPOSE_FILE
+  fi
+
+}

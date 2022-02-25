@@ -1,0 +1,62 @@
+
+# FORCEYES
+# STACKDIR
+source $DS_SRCPATH/inc/fn_database
+
+#source $DS_SRCPATH/stacks/$STACKNAME/fn_compose
+
+
+
+
+
+dockserv_remove(){
+  info "dockserv_remove()  $1"
+
+  if [ -f "$1/.env" ]; then
+    export $(cat $1/.env | grep -v '#' | awk '/=/ {print $1}')
+  else
+    echo "No .env file found!"
+    exit
+  fi
+  #cat "$1/.env"
+  # STACKNAME
+  # DOCKSERVE_STACK=
+  # DOCKSERVE_BACKUP_FOLDER
+  # DOCKSERVE_BACKUP_EXTFOLDER
+  #
+  # DB_SERVER
+  # DB_USER
+  # DB_NAME
+
+
+
+  ##exit
+  docker-compose --env-file "$1/.env" -f $1/docker-compose.yml down
+  docker volume prune -f  >/dev/null
+  docker container prune -f>/dev/null
+
+  if [ "$DB_SERVER" == "none" ]; then
+    info "No db to remove"
+  else
+    dockserve_database_drop
+    dockserve_database_user_drop
+
+  fi
+
+  if [ -d $1/config ];then
+    rm -rf $1/config
+  fi
+
+  if [ -f $1/.env ];then
+    rm -f $1/.env
+  fi
+
+  if [ -f $1/docker-compose.yml ];then
+    rm -f $1/docker-compose.yml
+  fi
+
+  if [ -d $1 ];then
+    rm -rf $1
+  fi
+
+}

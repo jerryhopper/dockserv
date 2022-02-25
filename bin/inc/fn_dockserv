@@ -1,0 +1,56 @@
+dockserv_uninstall_ds_traefik() {
+  info "dockserv_uninstall_ds_traefik()"
+  STACKNAME=ds_traefik
+  STACKDIR=~/.${STACKNAME}
+  HOSTNAMES=$(hostname)
+
+  dockserv_remove "$STACKDIR"
+
+}
+
+
+dockserv_uninstall_ds_mariadb() {
+  info "dockserv_uninstall_ds_traefik()"
+  STACKNAME=ds_mariadb
+  STACKDIR=~/.${STACKNAME}
+  HOSTNAMES=$(hostname)
+
+  dockserv_remove "$STACKDIR"
+
+}
+
+dockserv_install_ds_mariadb() {
+  info "dockserv_install_ds_mariadb()"
+  STACKNAME=ds_mariadb
+  STACKDIR=~/.${STACKNAME}
+  HOSTNAMES=$(hostname)
+
+  dockserv_create "$STACKNAME" "$HOSTNAMES"
+
+}
+dockserv_install_ds_traefik() {
+  info "dockserv_install_ds_traefik()"
+  STACKNAME=ds_traefik
+  STACKDIR=~/.${STACKNAME}
+  HOSTNAMES=$(hostname)
+
+  DOCKSERVE_LE_EMAIL=$1
+
+  dockserv_create "$STACKNAME" "$HOSTNAMES"
+}
+
+dockserv_install() {
+  info "inc/fn_dockserv - dockserv_ install"
+
+  dockserv_install_ds_traefik "$1"
+  dockserv_install_ds_mariadb "$1"
+
+}
+
+dockserv_uninstall() {
+  info "inc/dn_dockserv - dockserv_uninstall"
+  echo "INFO: Uninstalling dockserv "
+
+  dockserv_uninstall_ds_traefik
+  dockserv_uninstall_ds_mariadb
+}

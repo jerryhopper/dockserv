@@ -1,0 +1,34 @@
+
+
+
+stack_swoole74_fn_compose () {
+   info "stack_swoole74_fn_compose()"
+
+   echo "  ">>$STACKDIR/docker-compose.yml
+   echo "  # " >>$STACKDIR/docker-compose.yml
+   echo "  ###############################################" >>$STACKDIR/docker-compose.yml
+   echo "  swoole:" >>$STACKDIR/docker-compose.yml
+   echo "    image: openswoole/swoole:php7.4" >>$STACKDIR/docker-compose.yml
+   echo "    container_name: \${STACKNAME}_web" >>$STACKDIR/docker-compose.yml
+   echo "    restart: always" >>$STACKDIR/docker-compose.yml
+   echo "    networks:" >>$STACKDIR/docker-compose.yml
+   echo "      ds-proxy-net:" >>$STACKDIR/docker-compose.yml
+   echo "    volumes:" >>$STACKDIR/docker-compose.yml
+   echo "      - appdata:/var/app" >>$STACKDIR/docker-compose.yml
+   echo "    environment:" >>$STACKDIR/docker-compose.yml
+   echo "      - AUTORELOAD_PROGRAMS=swoole" >>$STACKDIR/docker-compose.yml
+   echo "      - AUTORELOAD_ANY_FILES=0" >>$STACKDIR/docker-compose.yml
+   echo "      - APP_HOST=https://\${HOSTNAME0}" >>$STACKDIR/docker-compose.yml
+   echo "      - APP_DBHOST=\${DB_SERVER}" >>$STACKDIR/docker-compose.yml
+   echo "      - APP_DBNAME=\${DB_NAME}" >>$STACKDIR/docker-compose.yml
+   echo "      - APP_DBUSER=\${DB_USER}" >>$STACKDIR/docker-compose.yml
+   echo "      - APP_DBPASS=\${DB_PASSWD}" >>$STACKDIR/docker-compose.yml
+
+   compose_loggingblock "$STACKDIR/docker-compose.yml" >>$STACKDIR/docker-compose.yml
+   echo "    #" >>$STACKDIR/docker-compose.yml
+   echo "    #" >>$STACKDIR/docker-compose.yml
+   echo "    labels:" >>$STACKDIR/docker-compose.yml
+
+
+
+}

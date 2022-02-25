@@ -1,0 +1,138 @@
+
+
+
+
+stack_ds_traefik_fn_compose(){
+   info "stack_ds_traefik_fn_compose()"
+
+
+
+    echo "DS_SRCPATH=$DS_SRCPATH"
+    echo "STACKDIR=$STACKDIR"
+    echo "STACKNAME=$STACKNAME"
+    echo "HOSTNAMES=$HOSTNAMES"
+    echo "DOCKSERVE_LE_EMAIL=$DOCKSERVE_LE_EMAIL"
+
+    echo "PROJECTNAME=$PROJECTNAME"
+
+
+   if [ ! -d $STACKDIR/config ]; then
+     mkdir $STACKDIR/config
+   fi
+
+   echo "api:">$STACKDIR/config/traefik.yml
+   echo "  dashboard: false">>$STACKDIR/config/traefik.yml
+   echo "entryPoints:">>$STACKDIR/config/traefik.yml
+   echo "  http:">>$STACKDIR/config/traefik.yml
+   echo "    address: \":80\"">>$STACKDIR/config/traefik.yml
+   echo "  https:">>$STACKDIR/config/traefik.yml
+   echo "    address: \":443\"">>$STACKDIR/config/traefik.yml
+   echo "">>$STACKDIR/config/traefik.yml
+   echo "providers:">>$STACKDIR/config/traefik.yml
+   echo "  docker:">>$STACKDIR/config/traefik.yml
+   echo "    endpoint: \"unix:///var/run/docker.sock\"">>$STACKDIR/config/traefik.yml
+   echo "    exposedByDefault: false">>$STACKDIR/config/traefik.yml
+   echo "">>$STACKDIR/config/traefik.yml
+   echo "certificatesResolvers:">>$STACKDIR/config/traefik.yml
+   echo "  http:">>$STACKDIR/config/traefik.yml
+   echo "    acme:">>$STACKDIR/config/traefik.yml
+   echo "      email: ${DOCKSERVE_LE_EMAIL}">>$STACKDIR/config/traefik.yml
+   echo "      storage: acme.json">>$STACKDIR/config/traefik.yml
+   echo "      httpChallenge:">>$STACKDIR/config/traefik.yml
+   echo "        entryPoint: http">>$STACKDIR/config/traefik.yml
+
+   echo "http:">$STACKDIR/config/config.yml
+   echo "  middlewares:">>$STACKDIR/config/config.yml
+   echo "    https-redirect:">>$STACKDIR/config/config.yml
+   echo "      redirectScheme:">>$STACKDIR/config/config.yml
+   echo "        scheme: https">>$STACKDIR/config/config.yml
+
+
+
+
+   echo "  ">>$STACKDIR/docker-compose.yml
+   echo "  # TRAEFIK SECTION" >>$STACKDIR/docker-compose.yml
+   echo "  ###############################################" >>$STACKDIR/docker-compose.yml
+   echo "  ds-traefik:" >>$STACKDIR/docker-compose.yml
+   echo "    image: traefik:v2.6.1" >>$STACKDIR/docker-compose.yml
+   echo "    container_name: ds-traefik"  >>$STACKDIR/docker-compose.yml
+   echo "    restart: unless-stopped"  >>$STACKDIR/docker-compose.yml
+   echo "    security_opt:"  >>$STACKDIR/docker-compose.yml
+   echo "      - no-new-privileges:true"  >>$STACKDIR/docker-compose.yml
+   echo "    networks:"  >>$STACKDIR/docker-compose.yml
+   echo "      - ds-proxy-net" >>$STACKDIR/docker-compose.yml
+   echo "    ports:" >>$STACKDIR/docker-compose.yml
+   echo "      - 80:80" >>$STACKDIR/docker-compose.yml
+   echo "      - 443:443" >>$STACKDIR/docker-compose.yml
+   echo "    volumes:" >>$STACKDIR/docker-compose.yml
+   echo "      - /etc/localtime:/etc/localtime:ro" >>$STACKDIR/docker-compose.yml
+   echo "      - /var/run/docker.sock:/var/run/docker.sock:ro" >>$STACKDIR/docker-compose.yml
+   echo "      - ./config/traefik.yml:/traefik.yml:ro" >>$STACKDIR/docker-compose.yml
+   echo "      - ./config/:/config.yml:ro" >>$STACKDIR/docker-compose.yml
+   echo "      - ds-acme-certs:/acme.json" >>$STACKDIR/docker-compose.yml
+   echo "    command:" >>$STACKDIR/docker-compose.yml
+   echo "      - \"--log.level=ERROR\" " >>$STACKDIR/docker-compose.yml
+
+   compose_loggingblock "$STACKDIR/docker-compose.yml" >>$STACKDIR/docker-compose.yml
+
+   echo "    labels:" >>$STACKDIR/docker-compose.yml
+   echo "      - traefik.enable=true" >>$STACKDIR/docker-compose.yml
+   echo "      - traefik.http.routers.traefik.entrypoints=http" >>$STACKDIR/docker-compose.yml
+
+   echo "    networks:" >>$STACKDIR/docker-compose.yml
+   echo "      - ds-proxy-net" >>$STACKDIR/docker-compose.yml
+   echo "  ">>$STACKDIR/docker-compose.yml
+   echo "  # CROWDSEC SECTION">>$STACKDIR/docker-compose.yml
+   echo "  ###############################################" >>$STACKDIR/docker-compose.yml
+   echo "  ds-crowdsec:" >>$STACKDIR/docker-compose.yml
+   echo "    image: crowdsecurity/crowdsec:v1.2.0" >>$STACKDIR/docker-compose.yml
+   echo "    container_name: ds-crowdsec" >>$STACKDIR/docker-compose.yml
+   echo "    restart: unless-stopped" >>$STACKDIR/docker-compose.yml
+   echo "    environment:" >>$STACKDIR/docker-compose.yml
+   echo "      COLLECTIONS: \"crowdsecurity/nginx\" " >>$STACKDIR/docker-compose.yml
+   echo "      GID: \"\${GID-1000}\" " >>$STACKDIR/docker-compose.yml
+   echo "    depends_on:" >>$STACKDIR/docker-compose.yml
+   echo "      - 'ds-traefik'" >>$STACKDIR/docker-compose.yml
+   echo "    networks:" >>$STACKDIR/docker-compose.yml
+   echo "      - ds-proxy-net">>$STACKDIR/docker-compose.yml
+   echo "    volumes:" >>$STACKDIR/docker-compose.yml
+   echo "      - ds-crowdsec-db:/var/lib/crowdsec/data/" >>$STACKDIR/docker-compose.yml
+   echo "      - ds-crowdsec-config:/etc/crowdsec/" >>$STACKDIR/docker-compose.yml
+
+   compose_loggingblock "$STACKDIR/docker-compose.yml" >>$STACKDIR/docker-compose.yml
+
+   echo "  ">>$STACKDIR/docker-compose.yml
+   echo "  # BOUNCER SECTION">>$STACKDIR/docker-compose.yml
+   echo "  ###############################################" >>$STACKDIR/docker-compose.yml
+   echo "  ds-bouncer:" >>$STACKDIR/docker-compose.yml
+   echo "    image: fbonalair/traefik-crowdsec-bouncer:0.1.1" >>$STACKDIR/docker-compose.yml
+   echo "    container_name: ds-bouncer" >>$STACKDIR/docker-compose.yml
+   echo "    restart: unless-stopped" >>$STACKDIR/docker-compose.yml
+   echo "    environment:" >>$STACKDIR/docker-compose.yml
+   echo "      CROWDSEC_BOUNCER_API_KEY: $2" >>$STACKDIR/docker-compose.yml
+   echo "      CROWDSEC_AGENT_HOST: ds-crowdsec:8080" >>$STACKDIR/docker-compose.yml
+   echo "    networks:" >>$STACKDIR/docker-compose.yml
+   echo "      - ds-proxy-net" >>$STACKDIR/docker-compose.yml
+
+   compose_loggingblock "$STACKDIR/docker-compose.yml" >>$STACKDIR/docker-compose.yml
+
+   echo "">>$STACKDIR/docker-compose.yml
+   echo "# VOLUME SECTION">>$STACKDIR/docker-compose.yml
+   echo "###############################################" >>$STACKDIR/docker-compose.yml
+   echo "volumes:" >>$STACKDIR/docker-compose.yml
+   echo "  ds-acme-certs:" >>$STACKDIR/docker-compose.yml
+   echo "  ds-crowdsec-config:" >>$STACKDIR/docker-compose.yml
+   echo "  ds-crowdsec-db:" >>$STACKDIR/docker-compose.yml
+
+   echo "">>$STACKDIR/docker-compose.yml
+   echo "# NETWORK SECTION">>$STACKDIR/docker-compose.yml
+   echo "###############################################" >>$STACKDIR/docker-compose.yml
+   echo "networks:" >>$STACKDIR/docker-compose.yml
+   echo "  ds-proxy-net:" >>$STACKDIR/docker-compose.yml
+   echo "    external: true" >>$STACKDIR/docker-compose.yml
+
+
+
+
+
+}

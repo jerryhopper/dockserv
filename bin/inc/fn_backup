@@ -1,0 +1,139 @@
+
+# DS_SRCPATH
+# STACKDIR
+#
+
+
+
+
+dockserv_upload_backup (){
+
+  BACKUP_FILENAME=${1}
+
+  SCP_USER=backup
+  SCP_HOST=141.224.243.79
+  SCP_PORT=2222
+  SCP_DIRECTORY=/backupstorage/backup-storage/$(hostname)/
+
+
+  TIME_UPLOAD="0"
+  TIME_UPLOADED="0"
+
+  info "Uploading backup by means of SCP"
+  SCP_CONFIG="-o StrictHostKeyChecking=no -P $SCP_PORT -i ~/.ssh/id_rsa -q"
+  SSH_CONFIG="-o StrictHostKeyChecking=no -p $SCP_PORT -i ~/.ssh/id_rsa"
+
+  #if [ ! -z "$PRE_SCP_COMMAND" ]; then
+  #  echo "Pre-scp command: $PRE_SCP_COMMAND"
+  #  ssh $SSH_CONFIG $SCP_USER@$SCP_HOST $PRE_SCP_COMMAND
+  #fi
+
+  echo "Will upload $BACKUP_FILENAME to $SCP_HOST:$SCP_DIRECTORY"
+  TIME_UPLOAD="$(date +%s.%N)"
+  scp $SCP_CONFIG ${STACKDIR}/$BACKUP_FILENAME $SCP_USER@$SCP_HOST:$SCP_DIRECTORY
+  echo "Upload finished"
+  TIME_UPLOADED="$(date +%s.%N)"
+
+  #if [ ! -z "$POST_SCP_COMMAND" ]; then
+  #  echo "Post-scp command: $POST_SCP_COMMAND"
+  #  ssh $SSH_CONFIG $SCP_USER@$SCP_HOST $POST_SCP_COMMAND
+  #fi
+
+  rm -f ${STACKDIR}/$BACKUP_FILENAME
+}
+
+
+
+
+dockserv_backup(){
+  #info "fn_create_backup $1"
+  ##################################################################
+  # Local .env
+  #echo "- DOT.ENV ----------------"
+  #cat $1/.env
+  #echo "--------------------------"
+  #STACKPATH=$1
+  if [ -f "$STACKDIR/.env" ]; then
+    export $(cat $STACKDIR/.env | grep -v '#' | awk '/=/ {print $1}')
+  else
+    echo "No .env file found!"
+    exit
+  fi
+  ##################################################################
+
+  declare -r d=$(date +%Y-%m-%d-%H%M)
+
+  declare -r BACKUPFILENAME="${STACKNAME}-${d}.tar.gz"
+
+
+  source "$DS_SRCPATH/stacks/${DOCKSERVE_STACK}/fn_backup"
+
+  # Disable app??
+  BEFOREFUNCTION="stack_${DOCKSERVE_STACK}_backup_fn_backup_before"
+  $BEFOREFUNCTION
+
+
+  BACKUPFUNCTION="stack_${DOCKSERVE_STACK}_backup_fn_backup"
+  $BACKUPFUNCTION
+
+  if [ "$DOCKSERVE_DB" = "true" ]; then
+    # dump sql
+    docker exec -i ds-mariadb mysqldump --routines --triggers --default_character_set utf8 -u ${DB_USER} -p${DB_PASSWD} ${DB_NAME} > ${STACKDIR}/${DB_NAME}.sql
+    info "Sql database exported.";
+  fi
+
+  # archive data
+  info  "Archiving ${DOCKSERVE_BACKUP_FOLDER} into data.tar.gz"
+  TARCMD="tar --exclude='./var/cache/prod' --exclude='./var/cache/dev' -czf /host/data.tar.gz -C ${DOCKSERVE_BACKUP_FOLDER} ."
+  docker run -it -v $STACKDIR:/host --volumes-from ${STACKNAME}_web ubuntu $TARCMD
+
+#exit
+
+  # Enable app??
+  AFTERFUNCTION="stack_${DOCKSERVE_STACK}_backup_fn_backup_after"
+  $AFTERFUNCTION
+
+
+  # Fix Permissions.
+  docker run -it -v $STACKDIR:/host --volumes-from ${STACKNAME}_web ubuntu chown $(id dockserve -u):$(id dockserve -g) /host/data.tar.gz
+
+
+  # Create final backup archive
+  #tar -C ${STACKPATH} -zcf "${STACKPATH}/${BACKUPFILENAME}" ${STACKPATH}/data.tar.gz ${STACKPATH}/${DB_NAME}.sql ${STACKPATH}/.env ${STACKPATH}/docker-compose.yml
+  #tar --exclude='${STACKPATH}/${BACKUPFILENAME}' --exclude='./${BACKUPFILENAME}' -zcf "${STACKPATH}/${BACKUPFILENAME}" -C ${STACKPATH} .
+
+  if [ -d ${STACKDIR}/config ]; then
+    tar -zcf "${STACKDIR}/${BACKUPFILENAME}" -C ${STACKDIR} ./.env ./docker-compose.yml ./${DB_NAME}.sql ./config ./data.tar.gz
+  else
+    tar -zcf "${STACKDIR}/${BACKUPFILENAME}" -C ${STACKDIR} ./.env ./docker-compose.yml ./${DB_NAME}.sql ./data.tar.gz
+  fi
+  info "Archive created."
+
+
+  # Cleanup files
+  if [ "$DOCKSERVE_DB" = "true" ]; then
+    rm ${STACKDIR}/${DB_NAME}.sql
+  fi
+  rm ${STACKDIR}/data.tar.gz
+
+
+
+
+
+
+
+
+  if [ ! -f ~/.ssh/id_rsa ];then
+    echo "WARNING: No key found in ~/.ssh/id_rsa "
+    echo "WARNING: Upload is disabled."
+  else
+    #info "uploading.."
+    dockserv_upload_backup "${BACKUPFILENAME}"
+  fi
+
+
+
+info "Backup finished.";
+
+
+}

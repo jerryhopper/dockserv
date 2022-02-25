@@ -1,0 +1,43 @@
+
+
+
+dockserve_database_user_create(){
+  #dockserve_database_loadenv
+  #export $(cat ~/.ds_mariadb/.env | grep -v '#' | awk '/=/ {print "DB_"$1}')
+
+  info "Create user ( ${DB_NAME}/${DB_USER}/${DB_PASSWD} [ ${DB_ROOT_PASSWORD}  ])"
+  docker exec -it ds-mariadb mysql --protocol=TCP --password=$DB_ROOT_PASSWORD --default_character_set utf8 -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWD}';"
+  #"GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, DROP, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON ${DB_NAME}.* TO '${DB_USER}'@'%';"
+}
+
+dockserve_database_user_drop(){
+  #dockserve_database_loadenv
+
+  info "Removing user ${DB_USER}"
+  docker exec -i ds-mariadb mysql --protocol=TCP --password=$DB_ROOT_PASSWORD --default_character_set utf8 -e "DROP USER '${DB_USER}'@'%';"
+}
+
+dockserve_database_create(){
+  #dockserve_database_loadenv
+
+  dockserve_database_user_create
+#"$DB_NAME" "$DB_USER" "$DB_PASSWD"
+  info "Creating database/user/pwd ( ${DB_NAME}/${DB_USER}/${DB_PASSWD} [ ${DB_ROOT_PASSWORD}  ])"
+  docker exec -i ds-mariadb mysql --protocol=TCP --password=$DB_ROOT_PASSWORD --default_character_set utf8 -e "DROP DATABASE IF EXISTS ${DB_NAME}; create database ${DB_NAME};CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWD}';GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, DROP, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES ON ${DB_NAME}.* TO '${DB_USER}'@'%';"
+#exit
+
+  #echo "createdb.log " >./createdb.log
+  #echo "database: ${DB_DATABASE}" >>./createdb.log
+  #echo "user: ${DB_USER}" >>./createdb.log
+  #echo "password: ${DB_PASS}" >>./createdb.log
+  #echo "Database '${DB_DATABASE}' created ";
+  #exit
+}
+
+dockserve_database_drop(){
+  #dockserve_database_loadenv
+
+  info "Removing database ${DB_NAME}"
+  docker exec -it ds-mariadb mysql --protocol=TCP --password=$DB_ROOT_PASSWORD --default_character_set utf8 -e "DROP DATABASE IF EXISTS ${DB_NAME};"
+
+}

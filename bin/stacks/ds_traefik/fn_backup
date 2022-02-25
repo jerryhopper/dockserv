@@ -1,0 +1,13 @@
+
+
+stack_traefik_backup_fn_backup_before(){
+  info "stack_traefik_backup_fn_backup_before"
+}
+stack_traefik_backup_fn_backup_after(){
+  info "stack_traefik_backup_fn_backup_after"
+}
+
+
+stack_ds_traefik_fn_backup(){
+
+}

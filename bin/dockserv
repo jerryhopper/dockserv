@@ -1,0 +1,390 @@
+#!/bin/bash
+
+
+set -e
+
+if [ "dockserve" != "$(whoami)" ];then
+   echo "ERROR: i cannot run as user $(whoami)"
+   echo "INFO: Please run as user 'dockserve "
+#   exit
+fi
+
+
+declare -r DS_SRCPATH=$(dirname $0)
+
+
+source $DS_SRCPATH/inc/fn_common
+source $DS_SRCPATH/inc/fn_dockserv
+
+source $DS_SRCPATH/inc/fn_create
+source $DS_SRCPATH/inc/fn_backup
+source $DS_SRCPATH/inc/fn_import
+source $DS_SRCPATH/inc/fn_remove
+
+source $DS_SRCPATH/inc/fn_download
+
+echo -e "$BYellow Dockserv version 0.1 $reset "
+echo -e "$BYellow-------------------------------------------- $reset "
+
+
+#notice "The script you are running has basename `basename "$0"`, dirname `dirname "$0"`"
+#notice "The present working directory is `pwd`"
+
+#####################################################################33
+
+#notice "notice"
+#info "info"
+#warn "warn"
+#error "error"
+#fatal "fatal"
+
+while getopts "RFbc:i:d:h:" o; do
+    #echo "${o} = ${OPTARG}"
+    case "${o}" in
+        c)
+            c=${OPTARG}
+            ;;
+        i)
+            i=${OPTARG}
+            ;;
+
+        b)
+            b=1
+            ;;
+        R)
+            R=1
+            ;;
+        F)
+            F=1
+            ;;
+
+        d)
+            d=${OPTARG}
+            ;;
+        h)
+            h=${OPTARG}
+            ;;
+
+        p)
+            p=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+
+# Load database settings.
+  if [ -f ~/.ds_mariadb/.env ]; then
+    #export $(cat ~/.ds_mariadb/.env | grep -v '#' | awk '/=/ {print $1}') &> /dev/null
+    #echo $(cat ~/.ds_mariadb/.env | grep -v '#' | awk '/=/ {print "DB_"$1}')
+    source ~/.ds_mariadb/.env
+
+  fi
+
+
+if ( [ "${b}" ] && [ "${c}" ] ); then
+  fatal "the backup flag (-b) cannot be used in conjunction with create (-c)"
+fi
+if ( [ "${b}" ] && [ "${i}" ] ); then
+  fatal "the backup flag (-b) cannot be used in conjunction with import (-i)"
+fi
+if ( [ "${c}" ] && [ "${i}" ] ); then
+  fatal "the create flag (-c) cannot be used in conjunction with import (-i)"
+fi
+
+if ( [ "${R}" ] && [ "${i}" ] ); then
+  fatal "the remove flag (-R) cannot be used in conjunction with import (-i)"
+fi
+if ( [ "${R}" ] && [ "${b}" ] ); then
+  fatal "the remove flag (-R) cannot be used in conjunction with backup (-b)"
+fi
+if ( [ "${R}" ] && [ "${c}" ] ); then
+  fatal "the remove flag (-R) cannot be used in conjunction with create (-c)"
+fi
+
+if ( [ ! "${h}" ] && [ "${c}" ] ); then
+  fatal "the create flag (-c) requires the host (-h) flag"
+fi
+
+
+
+#####################################################################
+#
+if [ -z "${d}" ]; then
+  #echo "Directory not set. (Using current directory:  $PWD)"
+  declare -r STACKDIR=$PWD
+else
+   if [ "." == "${d}" ];then
+     declare -r STACKDIR=$PWD
+   elif [ -d ${d} ]; then
+     declare -r STACKDIR="${d}"
+   else
+     if [ "${c}" ] ; then
+
+       #mkdir ${d}
+       declare -r STACKDIR="${d}"
+     else
+       fatal "Directory does not exist. (${d})"
+       exit
+     fi
+
+
+   fi
+fi
+
+
+
+if [ ! -z "${F}" ];then
+  warn "Forcing YES on interactive questions."
+  FORCEYES="yes"
+else
+  notice "Interactive mode."
+  FORCEYES="no"
+fi
+#
+#####################################################################
+#echo "stackdir='$STACKDIR'"
+
+
+
+if [ ! -z "${c}" ]; then
+  ######################################################################################
+  #  CREATE STACK
+  #
+  if [ ! -d  "${DS_SRCPATH}/stacks/${c}" ]; then
+      fatal "Invalid or unknown stack"
+  fi
+
+
+  #echo "CREATE  ${c}"
+  if [ -f "${STACKDIR}/docker-compose.yml" ]; then
+    error  "docker-compose.yml found in $STACKDIR"
+  fi
+  if [ -f "${STACKDIR}/.env" ]; then
+    error ".env found in $STACKDIR"
+    echo exit
+  fi
+
+  if [ -z "${h}" ];then
+    fatal "Missing HOST (-h) parameter."
+  fi
+
+
+  # clean var from specialchars.
+  #echo $(charclean "${h}")
+
+  declare -r DOCKSERVE_STACK=${c}
+  declare -r HOSTNAMECSV=${h}
+
+
+
+
+  info "CREATE ${DOCKSERVE_STACK} IN ${STACKDIR} WITH HOSTNAME ${HOSTNAMECSV}"
+
+
+
+
+  #            ${c} = stackname  ${h} = hostname
+  #            STACKNAME  HOSTNAME
+  dockserv_create ${DOCKSERVE_STACK} ${HOSTNAMECSV}
+
+#exit
+
+  #bash ds_${c} ${c} ${h} ${STACKDIR}
+  #bash ds_prestashop "${c}" "${h}" "${STACKDIR}"
+  #exit
+  #echo $h
+  #IFS=',' #setting comma as delimiter
+  #read -a hosts <<<"$h"
+  #echo "-h : ${hosts[0]} "
+  #echo "-h : ${hosts[1]} "
+
+
+elif [ ! -z "${b}" ]; then
+  ######################################################################################
+  #  CREATE BACKUP
+  #
+
+  if [ ! -f ~/.ssh/id_rsa ];then
+    warn "No key found in ~/.ssh/id_rsa"
+    #ssh-keygen
+  fi
+
+  info "Backing up the dockerver stack located in $STACKDIR"
+  if [ ! -f "${STACKDIR}/docker-compose.yml" ]; then
+    fatal  "NO COMPOSE  ${STACKDIR}/docker-compose.yml"
+    exit
+  fi
+
+  dockserv_backup "${STACKDIR}"
+  exit
+
+elif [ ! -z "${i}" ]; then
+  ######################################################################################
+  #  IMPORT BACKUP
+  #
+  notice "import backup"
+  declare -r IMPORTFILE=$i
+
+
+  if [ ! -f "${IMPORTFILE}" ]; then
+    fatal "Importfile doesnt exist ${IMPORTFILE}"
+    exit
+  fi
+  if [ ! -d "${STACKDIR}" ]; then
+    fatal "Destination dir doesnt exist. ${STACKDIR}"
+    exit
+  fi
+  if [ -f "${STACKDIR}/.env" ]; then
+    fatal "dot.env found in destination dir. ${STACKDIR}"
+    #exit
+  fi
+  if [ -f "${STACKDIR}/docker-compose.yml" ]; then
+    echo "FATAL: docker-compose.yml found in destination dir. ${STACKDIR}"
+    #exit
+  fi
+
+  #echo "- $i"
+  import_backup "$IMPORTFILE" "$STACKDIR"
+  # tar -zxvf $i $STACKDIR
+
+  exit
+elif [ ! -z "${R}" ];then
+
+  if [ ! -d "${STACKDIR}" ]; then
+    fatal "Destination dir doesnt exist. ${STACKDIR}"
+    exit
+  fi
+  if [ ! -f "${STACKDIR}/.env" ]; then
+    error "FATAL: No dot.env found in destination dir. ${STACKDIR}"
+    #exit
+  fi
+  if [ -f "${STACKDIR}/docker-compose.yml" ]; then
+    error "FATAL: docker-compose.yml found in destination dir. ${STACKDIR}"
+    #exit
+  fi
+
+
+
+  if [ "$FORCEYES" != "yes" ]; then
+    error "Do you want to remove the stack in ${STACKDIR} ?  [yes/no]"
+    read FORCEYES
+  fi
+  if [ "$FORCEYES" == "yes" ]; then
+    #bash dsRemove "${STACKDIR}"
+    dockserv_remove "${STACKDIR}"
+    exit
+  else
+    info "Removal cancelled"
+  fi
+
+  exit
+else
+  ######################################################################################
+  #  NO PARAMETERS
+  #
+  # echo "Nothing to do."
+  # check if the stack already exists.
+
+  docker inspect ds-traefik 1>/dev/null
+  RETURNCODE=$?
+  if [  $RETURNCODE -eq 1  ] ; then
+    error "required stack 'ds-traefik' not installed"
+    fatal "try : dockserve install <email@ddr.es>"
+    #exit
+  fi
+
+
+
+  # TRAEFIK IS INSTALLED.
+  if [  $RETURNCODE -eq 0  ] ; then
+    notice "required ds-traefik installed"
+
+    #echo "INFO: Dockserve stack found!"
+    if [ "$1" == "downloadbackup" ];then
+       info "Download backup from REMOTE storage."
+       downloadbackup
+       exit
+    fi
+
+
+
+
+    # Uninstall dockserve
+    if [ "$1" == "uninstall" ];then
+      #
+      # Force yes flag
+      if [ "$2" == "-F" ]; then
+        varname=yes
+      else
+        error "Do you want to remove Dockserv?  [yes/no]"
+        read varname
+      fi
+      if [ "$varname" == "yes" ]; then
+        #if [ "mariadb" == "$2" ]; then
+        #  uninstall_ds_mariadb
+        #  exit
+        #fi
+        dockserv_uninstall
+      else
+        echo "You cancelled the removal."
+      fi
+      exit
+    fi
+
+    if [ "" == "$1"  ]; then
+      usage
+      exit
+
+    fi
+
+  # TRAEFIK IS INSTALLED.
+  else
+    #info "a123"
+    if [ "$1" == "downloadbackup" ];then
+       info "Download backup from REMOTE storage."
+       downloadbackup
+       exit
+    fi
+    if [ "$1" == "install" ];then
+      if [ "$2" == "" ];then
+          error "Missing required email adress!"
+          echo ""
+          usage
+          exit
+      fi
+      dockserv_install "$2"
+      exit
+    else
+      usage
+      exit
+    fi
+  fi
+
+
+
+
+fi
+
+exit
+
+
+
+
+
+
+echo "Running dockserv in $PWD"
+
+
+# if no docker-compose found.
+
+LE_EMAIL="hopper.jerry@gmail.com"
+
+
+
+
+

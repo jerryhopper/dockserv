@@ -1,0 +1,119 @@
+#
+# STACK CREATION
+#
+# required function:  stack_ds_<STACKNAME>_fn_create
+#
+# Variables known:
+#
+# $DS_SRCPATH
+# $STACKDIR
+# $STACKNAME
+# $HOSTNAMES
+#
+# location  "$DS_SRCPATH/stacks/$STACKNAME/fn_create"
+#
+
+
+source $DS_SRCPATH/inc/fn_compose
+
+source $DS_SRCPATH/stacks/$STACKNAME/fn_compose
+
+
+
+stack_traefik_fn_create_env(){
+
+  info "Creating .ENV file."
+
+  echo "HOSTNAME0=$HOSTNAME0">$STACKDIR/.env
+  echo "HOSTNAME1=$HOSTNAME1">>$STACKDIR/.env
+
+  # DATABASE RELATED
+  echo "DB_SERVER=none">>$STACKDIR/.env
+
+
+  # APPLICATION SPECIFIC
+
+  # DOCKSERVE INFO
+  echo "DOCKSERVE_STACK=ds_traefik">>$STACKDIR/.env
+  echo "DOCKSERVE_LE_EMAIL=$DOCKSERVE_LE_EMAIL">>$STACKDIR/.env
+  #echo "DOCKSERVE_BACKUP_FOLDER=/var/www/html">>$STACKDIR/.env
+  #echo "DOCKSERVE_BACKUP_EXTFOLDER=/public_html">>$STACKDIR/.env
+
+
+
+
+}
+
+stack_ds_traefik_fn_define(){
+
+    DOCKSERVE_STACK=ds_traefik
+    DOCKSERVE_BACKUP_FOLDER=false
+    DOCKSERVE_DB=false
+    echo "stack_${DOCKSERVE_STACK}_fn_define()"
+}
+
+
+stack_ds_traefik_fn_create(){
+    info "stacks/stack_ds_traefik_fn_compose - stack_ds_traefik_fn_create\()"
+
+    # Check if ds-traefik is already installed
+    HOSTNAMES=$(hostname)
+
+    echo "DS_SRCPATH=$DS_SRCPATH"
+    echo "STACKDIR=$STACKDIR"
+    echo "STACKNAME=$STACKNAME"
+    echo "HOSTNAMES=$HOSTNAMES"
+
+
+    echo "PROJECTNAME=$PROJECTNAME"
+
+
+
+#    echo $STACKDIR
+
+
+    if [ ! -d $STACKDIR ]; then
+      info "Creating directory : $STACKDIR"
+      mkdir $STACKDIR
+    fi
+
+    # Create proxy
+    info "Creating network :"
+    docker network create ds-proxy-net
+
+
+
+    stack_traefik_fn_create_env
+
+    # Create docker-compose.
+    info "Composing YML"
+    compose_document    "$STACKDIR/docker-compose.yml"
+    stack_ds_traefik_fn_compose  "$STACKDIR/docker-compose.yml" "none"
+
+
+    # Setup the stack
+    info "Setting up the stack"
+    docker-compose --env-file "$STACKDIR/.env" -f $STACKDIR/docker-compose.yml up -d
+
+    # Create Crowdsec key if not exist.
+    if [ ! -f $STACKDIR/crowdsec.txt ] ;then
+      info "Create Crowdsec key"
+      docker exec ds-crowdsec cscli bouncers add traefik-bouncer>$STACKDIR/crowdsec.txt
+    fi
+
+    TRAEFIC_BOUNCER_KEY=$(sed '3q;d' $STACKDIR/crowdsec.txt| xargs)
+    echo "Traefik bouncer key: '$TRAEFIC_BOUNCER_KEY'"
+    docker-compose --env-file "$STACKDIR/.env" -f $STACKDIR/docker-compose.yml down
+
+    # Create docker-compose.
+    compose_document    "$STACKDIR/docker-compose.yml"
+    stack_ds_traefik_fn_compose  "$STACKDIR/docker-compose.yml" "$TRAEFIC_BOUNCER_KEY"
+
+    docker-compose --env-file "$STACKDIR/.env" -f $STACKDIR/docker-compose.yml up -d
+
+    echo "ds-traefik was setup."
+
+
+
+}
+

@@ -1,0 +1,97 @@
+
+
+
+#source fn_prestashop
+
+import_backup (){
+  info " stacks/prestashop/fn_restore | fn_import()"
+  # "$IMPORTFILE" "$STACKDIR"
+
+
+
+  info "tar -zxf $IMPORTFILE -C $STACKDIR "
+
+  tar -zxf $IMPORTFILE -C $STACKDIR .
+
+  # Create the stack witout starting it.
+  docker-compose --env-file "$STACKDIR/.env" -f "$STACKDIR/docker-compose.yml" up --no-start
+
+
+  ##################################################################
+  # Local .env
+  #echo "- DOT.ENV ----------------"
+  #cat $DESTINATION/.env
+  #echo "--------------------------"
+
+  if [ -f "$STACKDIR/.env" ]; then
+    export $(cat $STACKDIR/.env | grep -v '#' | awk '/=/ {print $1}')
+  else
+    echo "No .env file found!"
+    exit
+  fi
+  ##################################################################
+  #
+
+
+
+
+
+  # detect app
+  info "Instance archive extracted."
+  info "Extracting data archive for $DOCKSERVE_STACK application."
+  #
+  # Get the base filename from the backupfile path.
+  #
+  declare -r BACKUPFILENAME="$(basename -- $IMPORTFILE)"
+
+  #
+  # Unpack the data-archive into the volume.
+  #
+  TARCMD="tar -zxf /host/data.tar.gz -C $DOCKSERVE_BACKUP_FOLDER ."
+  info "docker run -it -v $STACKDIR:/host --volumes-from ${DOCKSERVE_STACK}_web ubuntu $TARCMD"
+
+
+
+  docker run -it -v $STACKDIR:/host --volumes-from ${DOCKSERVE_STACK}_web ubuntu $TARCMD
+  rm -f $STACKDIR/data.tar.gz
+
+
+  #docker run -it -v $STACKPATH:/host --volumes-from ${STACKNAME}_web ubuntu /bin/rm -rf /host/var
+
+  #echo "list"
+  #docker run -it -v $STACKPATH:/host --volumes-from ${STACKNAME}_web ubuntu ls -latr $DOCKSERVE_BACKUP_FOLDER
+#echo " source: $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_restore"
+  # Create & restore the database.
+  if [ -f $STACKDIR/${DB_NAME}.sql ]; then
+
+    dockserve_database_create "$DB_NAME" "$DB_USER" "$DB_PASSWD"
+    # import database
+    info "Importing database"
+    docker exec -i ds-mariadb mysql --protocol=TCP --host mariadb --default_character_set utf8 -u${DB_USER} -p${DB_PASSWD} ${DB_NAME} < $STACKDIR/${DB_NAME}.sql
+    rm -f $STACKDIR/${DB_NAME}.sql
+
+  fi
+  # read env file again.
+  if [ -f "$STACKDIR/.env" ]; then
+    export $(cat $STACKDIR/.env | grep -v '#' | awk '/=/ {print $1}')
+  else
+    echo "No .env file found!"
+    exit
+  fi
+
+
+
+
+#echo " source: $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_restore"
+source $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_restore
+
+
+# Calls the restore function for the application.
+"stack_${DOCKSERVE_STACK}_fn_restore"
+
+
+
+
+  docker-compose --env-file "$STACKDIR/.env" -f "$STACKDIR/docker-compose.yml"  up -d
+
+}

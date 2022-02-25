@@ -1,0 +1,21 @@
+
+source $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_app_specific
+
+
+
+stack_wordpress_backup_fn_backup_before(){
+  a=1
+  #info "stack_wordpress_backup_fn_backup_before"
+  #echo $DS_SRCPATH/stacks/$DO/fn_app_specific
+
+}
+stack_wordpress_backup_fn_backup_after(){
+  a=1
+  #info "stack_wordpress_backup_fn_backup_after"
+
+}
+
+stack_wordpress_backup_fn_backup(){
+  a=1
+  #info "stack_wordpress_backup_fn_backup"
+}

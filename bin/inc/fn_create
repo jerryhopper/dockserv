@@ -1,0 +1,180 @@
+
+source $DS_SRCPATH/inc/fn_common
+source $DS_SRCPATH/inc/fn_compose
+
+dockserve_create_traefik_isinstalled(){
+  notice "stack_ds_traefik_fn_isinstalled()"
+  docker inspect ds-traefik >/dev/null
+  if [ "$?" = "1" ] ;then
+    error "Traefik is NOT installed."
+  else
+    notice "Traefik is already installed."
+  fi
+  #exit
+}
+
+dockserv_create(){
+    notice " inc\ fn_create - dockserv_create $1 $2"
+
+
+    declare -r STACKNAME=$1
+
+
+    if [ ! -d "$DS_SRCPATH/stacks/$1" ];then
+      fatal "stack doesnt exist"
+    fi
+
+    # GET HOSTNAMES
+    IFS=',' #setting comma as delimiter
+    read -a HOSTNAMEARRAY <<<"$HOSTNAMECSV"
+    # HOSTNAMES = array!
+    declare -r HOSTNAMES=${HOSTNAMECSV}
+
+    declare -r HOSTNAME0=${HOSTNAMEARRAY[0]}
+    declare -r HOSTNAME1=${HOSTNAMEARRAY[1]}
+
+
+    # DS_SRCPATH
+    # STACKDIR
+
+    # Prevent ds-traefik from being installed twice.
+    if [ "$STACKNAME" = "ds_traefik" ];then
+      dockserve_create_traefik_isinstalled
+    fi
+
+    # Define container-name *(based on foldername)
+    declare -r PROJECTNAME=$(charclean "$(basename $STACKDIR)")
+
+    declare -r CONTAINERNAME=${PROJECTNAME}_${STACKNAME}
+
+    declare -r DB_NAME=${PROJECTNAME}_${STACKNAME}
+    declare -r DB_USER=${PROJECTNAME}_${STACKNAME}
+
+
+    # GENERATE PASSWORD
+    declare -r DB_PASSWD=$(randpw)
+
+
+#exit
+    # What we know now:
+    # STACKNAME The stackname : prestashop/wordpress/other
+    # STACKDIR  Location where the stack will be installed.
+    # HOSTNAMES Array with hostnames used for traefik labels.
+    # PROJECTNAME  example:  wwwtestnl *(cleaned parent folder name)
+    # CONTAINERNAME
+    #
+    #
+    # GENERATED_PASSWORD
+    #
+
+    # PROJECTNAME
+    # DB_USER
+    # DB_PASS
+    # DB_NAME
+
+
+  if [ ! -d "$DS_SRCPATH/stacks/$STACKNAME" ]; then
+    fatal "Path does not exist : ($DS_SRCPATH/stacks/$STACKNAME)"
+    exit
+  fi
+
+  # Create folder if it doesnt exist
+  if [ ! -d $STACKDIR ];then
+    mkdir $STACKDIR
+  fi
+
+  # Check if docker-compose.yml exists.
+  if [ -f "$STACKDIR/docker-compose.yml" ]; then
+    fatal "FATAL: docker-compose.yml exists!"
+    #exit
+  fi
+
+  # Check if docker-compose.yml exists.
+  if [ -f "$STACKDIR/.env" ]; then
+    fatal "FATAL: dotenv exists!"
+    #exit
+  fi
+
+
+
+
+
+
+
+
+
+
+    # DOCKSERVE_STACK  - Already readonly
+    DOCKSERVE_BACKUP_FOLDER=""
+    DOCKSERVE_DB=""
+    DOCKSERVE_STACKPORT=80
+
+
+
+    # Import the stack functions.
+    notice "sourcing: $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_create"
+    source "$DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_create"
+
+
+    #echo "2.STACKNAME=$STACKNAME"
+
+
+
+    "stack_${DOCKSERVE_STACK}_fn_define"
+
+#echo "3.STACKNAME=$STACKNAME"
+
+    ######################################################################################
+    # Call the dockserv definitions for this stack
+    #
+    # DOCKSERVE_STACK= (wordpress/prestashop/nginx)
+    # DOCKSERVE_BACKUP_FOLDER= (/var/www/html /false)
+    # DOCKSERVE_DB (true/false)
+
+
+    if [ "DOCKSERVE_BACKUP_FOLDER" = "" ]; then
+      fatal "DOCKSERVE_BACKUP_FOLDER is empty!"
+    fi
+    if [ "DOCKSERVE_STACK" = "" ]; then
+      fatal "DOCKSERVE_STACK is empty!"
+    fi
+    if [ "DOCKSERVE_DB" = "" ]; then
+      fatal "DOCKSERVE_DB is empty!"
+    fi
+
+
+
+#echo "4.STACKNAME=$DOCKSERVE_STACK"
+    ######################################################################################
+    # Compose the .env file
+    compose_dotenv
+
+
+
+
+echo "5.STACKNAME=$DOCKSERVE_STACK"
+#exit
+
+    if [ "$DOCKSERVE_DB" == "true" ]; then
+      info "Creating database $DB_NAME with user $DB_USER";
+      dockserve_database_create "$DB_NAME" "$DB_USER" "$DB_PASSWD"
+      # load .env  (override loaded env by mariadb)
+      #if [ -f "${STACKDIR}/.env" ]; then
+      #  source $STACKDIR/.env
+      #  #cat /home/dockserve/.ds_mariadb/.env
+      #fi
+    else
+      info "Skipping database creation"
+    fi
+
+
+
+    ######################################################################################
+    # Call the function.
+    "stack_${DOCKSERVE_STACK}_fn_create"
+
+echo "6.STACKNAME=$STACKNAME"
+
+    docker-compose --env-file "$STACKDIR/.env" -f $STACKDIR/docker-compose.yml up -d
+
+}

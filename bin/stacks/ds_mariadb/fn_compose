@@ -1,0 +1,32 @@
+stack_ds_mariadb_compose(){
+
+  echo "  ds-mariadb:">>$STACKDIR/docker-compose.yml
+  echo "    image: mariadb">>$STACKDIR/docker-compose.yml
+  echo "    container_name: ds-mariadb">>$STACKDIR/docker-compose.yml
+  echo "    restart: always">>$STACKDIR/docker-compose.yml
+  echo "    networks:">>$STACKDIR/docker-compose.yml
+  echo "      ds-proxy-net:">>$STACKDIR/docker-compose.yml
+  echo "        aliases:">>$STACKDIR/docker-compose.yml
+  echo "          - mariadb">>$STACKDIR/docker-compose.yml
+  echo "          - database">>$STACKDIR/docker-compose.yml
+  echo "    volumes:">>$1
+  echo "      - ds-mariadb-data:/var/lib/mysql">>$STACKDIR/docker-compose.yml
+  echo "    environment:">>$STACKDIR/docker-compose.yml
+  echo "      - MYSQL_ROOT_PASSWORD=\${DB_ROOT_PASSWORD}">>$STACKDIR/docker-compose.yml
+
+  compose_loggingblock "$STACKDIR/docker-compose.yml" >>$STACKDIR/docker-compose.yml
+
+  echo "">>$STACKDIR/docker-compose.yml
+  echo "# VOLUME SECTION">>$STACKDIR/docker-compose.yml
+  echo "###############################################" >>$STACKDIR/docker-compose.yml
+  echo "volumes:" >>$STACKDIR/docker-compose.yml
+  echo "  ds-mariadb-data:" >>$STACKDIR/docker-compose.yml
+
+  echo "">>$STACKDIR/docker-compose.yml
+  echo "# NETWORK SECTION">>$STACKDIR/docker-compose.yml
+  echo "###############################################" >>$STACKDIR/docker-compose.yml
+  echo "networks:" >>$STACKDIR/docker-compose.yml
+  echo "  ds-proxy-net:" >>$STACKDIR/docker-compose.yml
+  echo "    external: true" >>$STACKDIR/docker-compose.yml
+
+}

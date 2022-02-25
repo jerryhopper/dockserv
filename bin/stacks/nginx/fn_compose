@@ -1,0 +1,27 @@
+stack_nginx_fn_compose () {
+   info "stack_nginx_fn_compose()"
+
+   echo "  ">>$STACKDIR/docker-compose.yml
+   echo "  # " >>$STACKDIR/docker-compose.yml
+   echo "  ###############################################" >>$STACKDIR/docker-compose.yml
+   echo "  nginx:" >>$STACKDIR/docker-compose.yml
+   echo "    image: nginx" >>$STACKDIR/docker-compose.yml
+   echo "    container_name: \${STACKNAME}_web" >>$STACKDIR/docker-compose.yml
+   echo "    restart: always" >>$STACKDIR/docker-compose.yml
+   echo "    networks:" >>$STACKDIR/docker-compose.yml
+   echo "      ds-proxy-net:" >>$STACKDIR/docker-compose.yml
+   echo "    volumes:" >>$STACKDIR/docker-compose.yml
+   echo "      - appdata:/usr/share/nginx/html" >>$STACKDIR/docker-compose.yml
+   #echo "    environment:" >>$STACKDIR/docker-compose.yml
+   #echo "      - WORDPRESS_DB_HOST=\${DB_SERVER}" >>$STACKDIR/docker-compose.yml
+   #echo "      - WORDPRESS_DB_USER=\${DB_USER}" >>$STACKDIR/docker-compose.yml
+   #echo "      - WORDPRESS_DB_PASSWORD=\${DB_PASSWD}" >>$STACKDIR/docker-compose.yml
+   #echo "      - WORDPRESS_DB_NAME=\${DB_NAME}" >>$STACKDIR/docker-compose.yml
+  compose_loggingblock "$STACKDIR/docker-compose.yml" >>$STACKDIR/docker-compose.yml
+   echo "    #" >>$STACKDIR/docker-compose.yml
+   echo "    #" >>$STACKDIR/docker-compose.yml
+   echo "    labels:" >>$STACKDIR/docker-compose.yml
+
+
+
+}

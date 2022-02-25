@@ -1,0 +1,8 @@
+
+
+stack_wordpress_fn_restore(){
+
+  source $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_app_specific
+
+
+}

@@ -1,0 +1,18 @@
+
+source $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_app_specific
+
+
+
+stack_nginx_backup_fn_backup_before(){
+  info "stack_nginx_backup_fn_backup_before"
+  #echo $DS_SRCPATH/stacks/$DO/fn_app_specific
+
+}
+stack_nginx_backup_fn_backup_after(){
+  info "stack_nginx_backup_fn_backup_after"
+
+}
+
+stack_nginx_backup_fn_backup(){
+  info "stack_nginx_backup_fn_backup"
+}
