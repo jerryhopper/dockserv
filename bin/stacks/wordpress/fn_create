@@ -64,7 +64,7 @@ stack_wordpress_fn_define(){
 
 
 stack_wordpress_fn_create(){
-    notice "stack_wordpress_fn_create() - ${DOCKSERVE_STACK}"
+    #notice "stack_wordpress_fn_create() - ${DOCKSERVE_STACK}"
 
 
 
@@ -139,5 +139,5 @@ stack_wordpress_fn_create(){
   #cat "$STACKDIR/docker-compose.yml"
   #cat "$STACKDIR/.env"
 
-  notice "end stack_wordpress_fn_create"
+ #notice "end stack_wordpress_fn_create"
 }

@@ -46,7 +46,6 @@ stack_traefik_fn_create_env(){
 
 stack_ds_traefik_fn_define(){
 
-    DOCKSERVE_STACK=ds_traefik
     DOCKSERVE_BACKUP_FOLDER=false
     DOCKSERVE_DB=false
     echo "stack_${DOCKSERVE_STACK}_fn_define()"

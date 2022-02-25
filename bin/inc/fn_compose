@@ -1,6 +1,6 @@
 
 usage() {
-  echo ""
+  echo "$reset"
   echo "Usage: dockserv <options>"
   echo ""
   echo " dockserv [-c <app>] [-b] [-d <folder>] [-R]"
@@ -41,7 +41,7 @@ compose_document(){
 }
 
 compose_dotenv(){
-  error "inc/fn_compose  compose_dotenv()"
+  #error "inc/fn_compose  compose_dotenv()"
   #error "STACKNAME=$STACKNAME"
   #error "DOCKSERVE_STACK=$DOCKSERVE_STACK"
   #exit

@@ -2,9 +2,7 @@
 
 
 downloadbackup(){
-  SCP_USER=backup
-  SCP_HOST=141.224.243.79
-  SCP_PORT=2222
+
 
   echo "--------------------------------------------------------"
   echo "Listing remote directory"
@@ -13,17 +11,15 @@ downloadbackup(){
 
   PRE_SCP_COMMAND="ls --width=1 ${THEPATH}/*"
 
-  SCP_CONFIG="-o StrictHostKeyChecking=no -P $SCP_PORT -i ~/.ssh/id_rsa -q"
-  SSH_CONFIG="-o StrictHostKeyChecking=no -p $SCP_PORT -i ~/.ssh/id_rsa"
 
-  ssh $SSH_CONFIG $SCP_USER@$SCP_HOST $PRE_SCP_COMMAND
+  ssh $DS_SSH_CONFIG $DS_SCP_USER@$DS_SCP_HOST $PRE_SCP_COMMAND
 
   echo "--------------------------------------------------------"
 
   echo "Enter the REMOTE filename you want to transfer to LOCAL folder $PWD, or enter to exit."
   read REMOTE_FILE
   if [ ! "$REMOTE_FILE" == "" ];then
-    scp $SCP_CONFIG $SCP_USER@$SCP_HOST:$REMOTE_FILE ./
+    scp $DS_SCP_CONFIG $DS_SCP_USER@$DS_SCP_HOST:$REMOTE_FILE ./
   fi
 
 }

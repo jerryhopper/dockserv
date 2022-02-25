@@ -2,7 +2,7 @@
 
 
 stack_wordpress_fn_compose () {
-   notice "stack_wordpress_fn_compose()"
+   #notice "stack_wordpress_fn_compose()"
 
    echo "  ">>$STACKDIR/docker-compose.yml
    echo "  # " >>$STACKDIR/docker-compose.yml

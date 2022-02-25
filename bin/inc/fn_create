@@ -14,7 +14,7 @@ dockserve_create_traefik_isinstalled(){
 }
 
 dockserv_create(){
-    notice " inc\ fn_create - dockserv_create $1 $2"
+    #notice " inc\ fn_create - dockserv_create $1 $2"
 
 
     declare -r STACKNAME=$1
@@ -112,7 +112,7 @@ dockserv_create(){
 
 
     # Import the stack functions.
-    notice "sourcing: $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_create"
+    #notice "sourcing: $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_create"
     source "$DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_create"
 
 
@@ -152,7 +152,7 @@ dockserv_create(){
 
 
 
-echo "5.STACKNAME=$DOCKSERVE_STACK"
+#echo "5.STACKNAME=$DOCKSERVE_STACK"
 #exit
 
     if [ "$DOCKSERVE_DB" == "true" ]; then
@@ -173,8 +173,9 @@ echo "5.STACKNAME=$DOCKSERVE_STACK"
     # Call the function.
     "stack_${DOCKSERVE_STACK}_fn_create"
 
-echo "6.STACKNAME=$STACKNAME"
+#
 
     docker-compose --env-file "$STACKDIR/.env" -f $STACKDIR/docker-compose.yml up -d
 
+    notice "Finished. ${DOCKSERVE_STACK} created in ${STACKDIR}"
 }

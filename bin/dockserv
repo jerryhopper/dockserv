@@ -24,13 +24,27 @@ source $DS_SRCPATH/inc/fn_remove
 source $DS_SRCPATH/inc/fn_download
 
 echo -e "$BYellow Dockserv version 0.1 $reset "
-echo -e "$BYellow-------------------------------------------- $reset "
-
+echo -e "$BYellow-------------------------------------------- $Color_Off "
+echo -e "$Color_Off"
 
 #notice "The script you are running has basename `basename "$0"`, dirname `dirname "$0"`"
 #notice "The present working directory is `pwd`"
 
 #####################################################################33
+
+
+if [ -f ~/.ssh/.dockserv ]; then
+  source ~/.ssh/.dockserv
+  declare -r DS_SCP_HOST=$SCP_HOST
+  declare -r DS_SCP_PORT=$SCP_PORT
+  declare -r DS_SCP_USER=$SCP_USER
+  declare -r DS_SCP_DIRECTORY=$SCP_DIRECTORY
+  declare -r DS_SCP_CONFIG="-o StrictHostKeyChecking=no -P $DS_SCP_PORT -i ~/.ssh/id_rsa -q"
+  declare -r DS_SSH_CONFIG="-o StrictHostKeyChecking=no -p $DS_SCP_PORT -i ~/.ssh/id_rsa"
+
+fi
+
+
 
 #notice "notice"
 #info "info"
@@ -78,12 +92,12 @@ shift $((OPTIND-1))
 
 
 # Load database settings.
-  if [ -f ~/.ds_mariadb/.env ]; then
+if [ -f ~/.ds_mariadb/.env ]; then
     #export $(cat ~/.ds_mariadb/.env | grep -v '#' | awk '/=/ {print $1}') &> /dev/null
     #echo $(cat ~/.ds_mariadb/.env | grep -v '#' | awk '/=/ {print "DB_"$1}')
     source ~/.ds_mariadb/.env
 
-  fi
+fi
 
 
 if ( [ "${b}" ] && [ "${c}" ] ); then
@@ -127,9 +141,9 @@ else
 
        #mkdir ${d}
        declare -r STACKDIR="${d}"
-     else
-       fatal "Directory does not exist. (${d})"
-       exit
+     #else
+     #  fatal "Directory does not exist. (${d})"
+     #  exit
      fi
 
 
@@ -137,7 +151,7 @@ else
 fi
 
 
-
+FORCEYES="no"
 if [ ! -z "${F}" ];then
   warn "Forcing YES on interactive questions."
   FORCEYES="yes"
@@ -155,6 +169,8 @@ if [ ! -z "${c}" ]; then
   ######################################################################################
   #  CREATE STACK
   #
+
+
   if [ ! -d  "${DS_SRCPATH}/stacks/${c}" ]; then
       fatal "Invalid or unknown stack"
   fi
@@ -162,10 +178,10 @@ if [ ! -z "${c}" ]; then
 
   #echo "CREATE  ${c}"
   if [ -f "${STACKDIR}/docker-compose.yml" ]; then
-    error  "docker-compose.yml found in $STACKDIR"
+    fatal  "docker-compose.yml found in $STACKDIR"
   fi
   if [ -f "${STACKDIR}/.env" ]; then
-    error ".env found in $STACKDIR"
+    fatal ".env found in $STACKDIR"
     echo exit
   fi
 
@@ -186,6 +202,9 @@ if [ ! -z "${c}" ]; then
   info "CREATE ${DOCKSERVE_STACK} IN ${STACKDIR} WITH HOSTNAME ${HOSTNAMECSV}"
 
 
+  if [ ! -d "${STACKDIR}" ]; then
+    notice  "Directory does not exist. $STACKDIR"
+  fi
 
 
   #            ${c} = stackname  ${h} = hostname
@@ -209,12 +228,13 @@ elif [ ! -z "${b}" ]; then
   #  CREATE BACKUP
   #
 
-  if [ ! -f ~/.ssh/id_rsa ];then
-    warn "No key found in ~/.ssh/id_rsa"
-    #ssh-keygen
+
+
+  info "Backing up the dockerver stack located in ${STACKDIR}"
+  if [ ! -d "${STACKDIR}" ]; then
+    fatal  "Directory does not exist. $STACKDIR"
   fi
 
-  info "Backing up the dockerver stack located in $STACKDIR"
   if [ ! -f "${STACKDIR}/docker-compose.yml" ]; then
     fatal  "NO COMPOSE  ${STACKDIR}/docker-compose.yml"
     exit
@@ -227,24 +247,25 @@ elif [ ! -z "${i}" ]; then
   ######################################################################################
   #  IMPORT BACKUP
   #
-  notice "import backup"
   declare -r IMPORTFILE=$i
+
+  notice "Importing backup : ${IMPORTFILE}  into : ${STACKDIR}"
 
 
   if [ ! -f "${IMPORTFILE}" ]; then
     fatal "Importfile doesnt exist ${IMPORTFILE}"
-    exit
+
   fi
   if [ ! -d "${STACKDIR}" ]; then
     fatal "Destination dir doesnt exist. ${STACKDIR}"
-    exit
+
   fi
   if [ -f "${STACKDIR}/.env" ]; then
     fatal "dot.env found in destination dir. ${STACKDIR}"
     #exit
   fi
   if [ -f "${STACKDIR}/docker-compose.yml" ]; then
-    echo "FATAL: docker-compose.yml found in destination dir. ${STACKDIR}"
+    fatal "FATAL: docker-compose.yml found in destination dir. ${STACKDIR}"
     #exit
   fi
 
@@ -255,17 +276,16 @@ elif [ ! -z "${i}" ]; then
   exit
 elif [ ! -z "${R}" ];then
 
+  notice "Attempting to remove the stack in ${STACKDIR}"
+
   if [ ! -d "${STACKDIR}" ]; then
     fatal "Destination dir doesnt exist. ${STACKDIR}"
-    exit
   fi
   if [ ! -f "${STACKDIR}/.env" ]; then
-    error "FATAL: No dot.env found in destination dir. ${STACKDIR}"
-    #exit
+    fatal "FATAL: No dot.env found in destination dir. ${STACKDIR}"
   fi
-  if [ -f "${STACKDIR}/docker-compose.yml" ]; then
-    error "FATAL: docker-compose.yml found in destination dir. ${STACKDIR}"
-    #exit
+  if [ ! -f "${STACKDIR}/docker-compose.yml" ]; then
+    fatal "FATAL: docker-compose.yml found in destination dir. ${STACKDIR}"
   fi
 
 
@@ -342,7 +362,7 @@ else
 
     fi
 
-  # TRAEFIK IS INSTALLED.
+  # TRAEFIK IS not INSTALLED.
   else
     #info "a123"
     if [ "$1" == "downloadbackup" ];then

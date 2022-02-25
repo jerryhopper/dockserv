@@ -10,27 +10,23 @@ dockserv_upload_backup (){
 
   BACKUP_FILENAME=${1}
 
-  SCP_USER=backup
-  SCP_HOST=141.224.243.79
-  SCP_PORT=2222
-  SCP_DIRECTORY=/backupstorage/backup-storage/$(hostname)/
-
+  if [ ! -f ${STACKDIR}/$BACKUP_FILENAME ]; then
+    fatal "Backupfile does not exist...."
+  fi
 
   TIME_UPLOAD="0"
   TIME_UPLOADED="0"
 
   info "Uploading backup by means of SCP"
-  SCP_CONFIG="-o StrictHostKeyChecking=no -P $SCP_PORT -i ~/.ssh/id_rsa -q"
-  SSH_CONFIG="-o StrictHostKeyChecking=no -p $SCP_PORT -i ~/.ssh/id_rsa"
 
   #if [ ! -z "$PRE_SCP_COMMAND" ]; then
   #  echo "Pre-scp command: $PRE_SCP_COMMAND"
   #  ssh $SSH_CONFIG $SCP_USER@$SCP_HOST $PRE_SCP_COMMAND
   #fi
 
-  echo "Will upload $BACKUP_FILENAME to $SCP_HOST:$SCP_DIRECTORY"
+  echo "Will upload $BACKUP_FILENAME to $DS_SCP_HOST:$DS_SCP_DIRECTORY"
   TIME_UPLOAD="$(date +%s.%N)"
-  scp $SCP_CONFIG ${STACKDIR}/$BACKUP_FILENAME $SCP_USER@$SCP_HOST:$SCP_DIRECTORY
+  scp $DS_SCP_CONFIG ${STACKDIR}/$BACKUP_FILENAME $DS_SCP_USER@$DS_SCP_HOST:$DS_SCP_DIRECTORY
   echo "Upload finished"
   TIME_UPLOADED="$(date +%s.%N)"
 

@@ -50,7 +50,6 @@ stack_ds_mariadb_fn_create_env(){
 
 stack_ds_mariadb_fn_define(){
 
-    DOCKSERVE_STACK=ds_mariadb
     DOCKSERVE_BACKUP_FOLDER=false
     DOCKSERVE_DB=false
     echo "stack_${DOCKSERVE_STACK}_fn_define()"
