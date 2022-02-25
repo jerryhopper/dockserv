@@ -11,12 +11,13 @@ source $DS_SRCPATH/inc/fn_database
 
 dockserv_remove(){
   info "dockserv_remove()  $1"
+  REMOVEPATH=$1
+
 
   if [ -f "$1/.env" ]; then
-    export $(cat $1/.env | grep -v '#' | awk '/=/ {print $1}')
+    export $(cat $REMOVEPATH/.env | grep -v '#' | awk '/=/ {print $1}')
   else
-    echo "No .env file found!"
-    exit
+    error "No .env file found!"
   fi
   #cat "$1/.env"
   # STACKNAME
@@ -31,7 +32,7 @@ dockserv_remove(){
 
 
   ##exit
-  docker-compose --env-file "$1/.env" -f $1/docker-compose.yml down
+  docker-compose --env-file "$REMOVEPATH/.env" -f $REMOVEPATH/docker-compose.yml down
   docker volume prune -f  >/dev/null
   docker container prune -f>/dev/null
 
@@ -42,21 +43,21 @@ dockserv_remove(){
     dockserve_database_user_drop
 
   fi
-
-  if [ -d $1/config ];then
-    rm -rf $1/config
+  #echo "REMOVEPATH = $REMOVEPATH"
+  if [ -d $REMOVEPATH/config ];then
+    rm -rf $REMOVEPATH/config
   fi
 
-  if [ -f $1/.env ];then
-    rm -f $1/.env
+  if [ -f $REMOVEPATH/.env ];then
+    rm -f $REMOVEPATH/.env
   fi
 
-  if [ -f $1/docker-compose.yml ];then
-    rm -f $1/docker-compose.yml
+  if [ -f $REMOVEPATH/docker-compose.yml ];then
+    rm -f $REMOVEPATH/docker-compose.yml
   fi
 
-  if [ -d $1 ];then
-    rm -rf $1
+  if [ -d $REMOVEPATH ];then
+    rm -rf $REMOVEPATH
   fi
-
+  info "fn_remove/dockserv_remove"
 }

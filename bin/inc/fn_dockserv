@@ -1,42 +1,42 @@
 dockserv_uninstall_ds_traefik() {
   info "dockserv_uninstall_ds_traefik()"
-  STACKNAME=ds_traefik
-  STACKDIR=~/.${STACKNAME}
+  #STACKNAME=ds_traefik
+  #STACKDIR=~/.${STACKNAME}
   HOSTNAMES=$(hostname)
 
-  dockserv_remove "$STACKDIR"
+  dockserv_remove "${HOME}/.ds_traefik"
 
 }
 
 
 dockserv_uninstall_ds_mariadb() {
   info "dockserv_uninstall_ds_traefik()"
-  STACKNAME=ds_mariadb
-  STACKDIR=~/.${STACKNAME}
+  #STACKNAME=ds_mariadb
+  #STACKDIR=${HOME}/.${STACKNAME}
   HOSTNAMES=$(hostname)
 
-  dockserv_remove "$STACKDIR"
+  dockserv_remove "${HOME}/.ds_mariadb"
 
 }
 
 dockserv_install_ds_mariadb() {
   info "dockserv_install_ds_mariadb()"
   STACKNAME=ds_mariadb
-  STACKDIR=~/.${STACKNAME}
+  #STACKDIR=${HOME}/.${STACKNAME}
   HOSTNAMES=$(hostname)
 
-  dockserv_create "$STACKNAME" "$HOSTNAMES"
+  dockserv_create "ds_mariadb" "$HOSTNAMES"
 
 }
 dockserv_install_ds_traefik() {
   info "dockserv_install_ds_traefik()"
   STACKNAME=ds_traefik
-  STACKDIR=~/.${STACKNAME}
+  #STACKDIR=${HOME}/.${STACKNAME}
   HOSTNAMES=$(hostname)
 
   DOCKSERVE_LE_EMAIL=$1
 
-  dockserv_create "$STACKNAME" "$HOSTNAMES"
+  dockserv_create "ds_traefik" "$HOSTNAMES"
 }
 
 dockserv_install() {
@@ -44,7 +44,7 @@ dockserv_install() {
 
 
 
-  if [ ! -f ~/.ssh/.dockserv]; then
+  if [ ! -f ~/.ssh/.dockserv ]; then
     notice "For the backupfunctionality to work, a SSH connection is required."
 
     error "Please enter the SCP user :"
@@ -77,7 +77,7 @@ dockserv_install() {
     echo "SCP_HOST=$SCP_HOST">> ~/.ssh/.dockserv
     echo "SCP_PORT=$SCP_PORT">> ~/.ssh/.dockserv
     echo "SCP_DIRECTORY=$SCP_DIRECTORY">> ~/.ssh/.dockserv
-
+    echo "DOCKSERVE_LE_EMAIL=$DOCKSERVE_LE_EMAIL">> ~/.ssh/.dockserv
     #SCP_HOST=141.224.243.79
     #SCP_PORT=2222
     #SCP_DIRECTORY=/backupstorage/backup-storage/$(hostname)/
@@ -85,12 +85,16 @@ dockserv_install() {
 
   fi
 
+echo "DOCKSERVE_LE_EMAIL $DOCKSERVE_LE_EMAIL"
 
 
+  bash $DS_SRCPATH/dockserv -c ds_traefik -d /home/dockserve/.ds_traefik -h localhost
 
+  bash $DS_SRCPATH/dockserv -c ds_mariadb -d /home/dockserve/.ds_mariadb -h localhost
 
-  dockserv_install_ds_traefik "$1"
-  dockserv_install_ds_mariadb "$1"
+  #dockserv_install_ds_traefik "$1"
+  #dockserv_install_ds_mariadb "$1"
+
 
 
   if [ ! -f ~/.ssh/id_rsa ];then

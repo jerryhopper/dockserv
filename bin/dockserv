@@ -312,16 +312,39 @@ else
   #  NO PARAMETERS
   #
   # echo "Nothing to do."
-  # check if the stack already exists.
 
+
+
+
+
+
+  # check if the stack already exists.
+  set +e
   docker inspect ds-traefik 1>/dev/null
   RETURNCODE=$?
   if [  $RETURNCODE -eq 1  ] ; then
     error "required stack 'ds-traefik' not installed"
+    if [ "$1" == "install" ];then
+      if [ "$2" == "" ];then
+          fatal "Missing required email adress!  (dockserve install em@il.adress)"
+          echo ""
+          usage
+          exit
+      fi
+      #declare -r DOCKSERVE_LE_EMAIL=$2
+      dockserv_install "$DOCKSERVE_LE_EMAIL"
+      exit
+    else
+      usage
+      exit
+    fi
+
+
+
     fatal "try : dockserve install <email@ddr.es>"
     #exit
   fi
-
+  set -e
 
 
   # TRAEFIK IS INSTALLED.

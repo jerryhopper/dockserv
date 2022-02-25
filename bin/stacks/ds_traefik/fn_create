@@ -19,8 +19,7 @@ source $DS_SRCPATH/inc/fn_compose
 source $DS_SRCPATH/stacks/$STACKNAME/fn_compose
 
 
-
-stack_traefik_fn_create_env(){
+stack_ds_traefik_fn_create_env(){
 
   info "Creating .ENV file."
 
@@ -56,7 +55,7 @@ stack_ds_traefik_fn_create(){
     info "stacks/stack_ds_traefik_fn_compose - stack_ds_traefik_fn_create\()"
 
     # Check if ds-traefik is already installed
-    HOSTNAMES=$(hostname)
+    #HOSTNAMES=$(hostname)
 
     echo "DS_SRCPATH=$DS_SRCPATH"
     echo "STACKDIR=$STACKDIR"
@@ -78,11 +77,12 @@ stack_ds_traefik_fn_create(){
 
     # Create proxy
     info "Creating network :"
-    docker network create ds-proxy-net
+    set +e
+      docker network create ds-proxy-net
+    set -e
 
 
-
-    stack_traefik_fn_create_env
+    stack_ds_traefik_fn_create_env
 
     # Create docker-compose.
     info "Composing YML"

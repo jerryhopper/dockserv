@@ -4,18 +4,20 @@ source $DS_SRCPATH/inc/fn_compose
 
 dockserve_create_traefik_isinstalled(){
   notice "stack_ds_traefik_fn_isinstalled()"
+  set +e
   docker inspect ds-traefik >/dev/null
   if [ "$?" = "1" ] ;then
     error "Traefik is NOT installed."
   else
     notice "Traefik is already installed."
   fi
+  set -e
   #exit
 }
 
 dockserv_create(){
     #notice " inc\ fn_create - dockserv_create $1 $2"
-
+    # dockserv_create "$STACKNAME" "$HOSTNAMES"
 
     declare -r STACKNAME=$1
 
@@ -112,7 +114,7 @@ dockserv_create(){
 
 
     # Import the stack functions.
-    #notice "sourcing: $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_create"
+    notice "sourcing: $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_create"
     source "$DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_create"
 
 
@@ -146,6 +148,10 @@ dockserv_create(){
 
 #echo "4.STACKNAME=$DOCKSERVE_STACK"
     ######################################################################################
+
+      # call the stack specific envfunction
+
+
     # Compose the .env file
     compose_dotenv
 
@@ -156,7 +162,7 @@ dockserv_create(){
 #exit
 
     if [ "$DOCKSERVE_DB" == "true" ]; then
-      info "Creating database $DB_NAME with user $DB_USER";
+      info "Creating database $DB_NAME with user $DB_USER"
       dockserve_database_create "$DB_NAME" "$DB_USER" "$DB_PASSWD"
       # load .env  (override loaded env by mariadb)
       #if [ -f "${STACKDIR}/.env" ]; then
@@ -171,6 +177,7 @@ dockserv_create(){
 
     ######################################################################################
     # Call the function.
+    echo "stack_${DOCKSERVE_STACK}_fn_create"
     "stack_${DOCKSERVE_STACK}_fn_create"
 
 #

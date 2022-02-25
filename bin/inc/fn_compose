@@ -46,6 +46,7 @@ compose_dotenv(){
   #error "DOCKSERVE_STACK=$DOCKSERVE_STACK"
   #exit
   # call the stack specific envfunction
+  echo "stack_${DOCKSERVE_STACK}_fn_create_env"
   "stack_${DOCKSERVE_STACK}_fn_create_env"
 
   # Append dockserv stuff.
