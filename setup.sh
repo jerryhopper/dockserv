@@ -17,8 +17,8 @@ fi
 chmod +x $PWD/bin/dockserv
 
 
-echo "PATH=\"$PATH:$PWD/bin\""> /etc/environment
-
+echo "PATH=\"$PATH:$PWD/bin\""> /tmp/environment
+sudo cp -f /tmp/environment /etc/environment
 
 # Create softlinks so binary is accessible
 #sudo ln -s $PWD/bin/dockserv /usr/bin/dockserv
