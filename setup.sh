@@ -17,7 +17,7 @@ fi
 chmod +x $PWD/bin/dockserv
 
 
-echo "PATH=\"$PATH:$PWD/bin\""> /etc/enviroment
+echo "PATH=\"$PATH:$PWD/bin\""> /etc/environment
 
 
 # Create softlinks so binary is accessible
