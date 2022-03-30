@@ -17,9 +17,12 @@ fi
 chmod +x $PWD/bin/dockserv
 
 
+echo "PATH=\"$PATH:$PWD/bin\""> /etc/enviroment
+
+
 # Create softlinks so binary is accessible
-sudo ln -s $PWD/bin/dockserv /usr/bin/dockserv
-chmod +x /usr/bin/dockserv
+#sudo ln -s $PWD/bin/dockserv /usr/bin/dockserv
+#chmod +x /usr/bin/dockserv
 
 # Check if docker is installed.
 if ! foobar_loc="$(type -p "docker")" || [[ -z $foobar_loc ]]; then
