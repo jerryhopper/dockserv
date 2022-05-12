@@ -50,8 +50,8 @@ dockserv_install() {
     error "Please enter the SCP user :"
     read SCP_USER
     if [ "$SCP_USER" = "" ];then
-      fatal "Missing SCP_USER!"
-    fi
+      error "Missing SCP_USER!"
+    else
 
     error "Please enter the remote SCP host/ip :"
     read SCP_HOST
@@ -81,6 +81,10 @@ dockserv_install() {
     #SCP_HOST=141.224.243.79
     #SCP_PORT=2222
     #SCP_DIRECTORY=/backupstorage/backup-storage/$(hostname)/
+
+    fi
+
+
 
 
   fi
