@@ -64,11 +64,12 @@ if id "dockserve" &>/dev/null; then
 else
     echo 'Creating user dockserve.'
     sudo useradd -m dockserve
-    #sudo chpasswd <<<"neubert:newpass"
+    sudo usermod --shell /bin/bash dockserve
+    #sudo chpasswd <<<"dockserve:somepass"
     #sudo chpasswd dockserve
     #sudo passwd dockserve
     sudo usermod -aG docker dockserve
 
 fi
 echo "-----------------------"
-echo "usage:   dockserve --help"
+echo "usage:   dockserv --help"
