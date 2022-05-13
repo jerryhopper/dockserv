@@ -65,7 +65,7 @@ else
     echo 'Creating user dockserve.'
     sudo useradd -m dockserve
     #sudo chpasswd <<<"neubert:newpass"
-    sudo chpasswd dockserve
+    #sudo chpasswd dockserve
     #sudo passwd dockserve
     sudo usermod -aG docker dockserve
 
