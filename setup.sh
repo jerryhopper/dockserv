@@ -6,13 +6,17 @@ if (( $EUID != 0 )); then
     exit
 fi
 
+if [ -f /tmp/dockserv.tar.gz ];then
+  rm -rf /tmp/dockserv.tar.gz
+fi
+
 curl -L https://github.com/jerryhopper/dockserv/archive/refs/heads/master.tar.gz --output /tmp/dockserv.tar.gz
 
 if [ ! -f /usr/lib/dockserv ]; then 
   sudo mkdir /usr/lib/dockserv
 fi
 
-sudo tar -zxvf /tmp/dockserv.tar.gz --strip-components=1 --directory /usr/lib/dockserv
+sudo tar -zxvf /tmp/dockserv.tar.gz --overwrite --strip-components=1 --directory /usr/lib/dockserv
 
 #sudo chown -R 
 
@@ -46,7 +50,7 @@ chmod +x /usr/bin/dockserv
 if ! foobar_loc="$(type -p "docker")" || [[ -z $foobar_loc ]]; then
   # install foobar here
   echo install docker
-  sudo apt-get install docker-compose -y
+  sudo apt-get install docker.io docker-compose -y
 fi
 
 # Check if group 'docker' exists.
@@ -63,13 +67,15 @@ if id "dockserve" &>/dev/null; then
 
 else
     echo 'Creating user dockserve.'
+    DPASS="$(< /dev/urandom tr -dc A-Z-a-z-0-9-! | head -c${1:-16};echo;)"
     sudo useradd -m dockserve
     sudo usermod --shell /bin/bash dockserve
-    #sudo chpasswd <<<"dockserve:somepass"
+    sudo chpasswd <<<"dockserve:$DPASS"
     #sudo chpasswd dockserve
     #sudo passwd dockserve
     sudo usermod -aG docker dockserve
-
+    echo "Password: $DPASS"
+    DPASS=""
 fi
 echo "-----------------------"
 echo "usage:   dockserv --help"
