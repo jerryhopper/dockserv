@@ -8,7 +8,7 @@ fi
 
 curl -L https://github.com/jerryhopper/dockserv/archive/refs/heads/master.tar.gz --output /tmp/dockserv.tar.gz
 
-if [ -f /usr/lib/dockserv ]; then 
+if [ ! -f /usr/lib/dockserv ]; then 
   sudo mkdir /usr/lib/dockserv
 fi
 
