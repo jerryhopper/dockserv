@@ -10,7 +10,7 @@ if [ "dockserve" != "$(whoami)" ];then
 fi
 
 
-declare -r DS_SRCPATH=$(dirname $0)
+declare -r DS_SRCPATH="/usr/lib/dockserv/bin"
 
 
 source $DS_SRCPATH/inc/fn_common
