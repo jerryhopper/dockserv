@@ -48,11 +48,11 @@ import_backup (){
   # Unpack the data-archive into the volume.
   #
   TARCMD="tar -zxf /host/data.tar.gz -C $DOCKSERVE_BACKUP_FOLDER ."
-  info "docker run -it -v $STACKDIR:/host --volumes-from ${DOCKSERVE_STACK}_web ubuntu $TARCMD"
+  info "docker run -it -v $STACKDIR:/host --volumes-from ${STACKNAME}_web ubuntu $TARCMD"
 
 
 
-  docker run -it -v $STACKDIR:/host --volumes-from ${DOCKSERVE_STACK}_web ubuntu $TARCMD
+  docker run -it -v $STACKDIR:/host --volumes-from ${STACKNAME}_web ubuntu $TARCMD
   rm -f $STACKDIR/data.tar.gz
 
 
