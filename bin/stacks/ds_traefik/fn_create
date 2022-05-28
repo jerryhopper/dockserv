@@ -108,6 +108,8 @@ stack_ds_traefik_fn_create(){
     compose_document    "$STACKDIR/docker-compose.yml"
     stack_ds_traefik_fn_compose  "$STACKDIR/docker-compose.yml" "$TRAEFIC_BOUNCER_KEY"
 
+    chown -R dockserve:dockserve $STACKDIR
+
     docker-compose --env-file "$STACKDIR/.env" -f $STACKDIR/docker-compose.yml up -d
 
     echo "ds-traefik was setup."
