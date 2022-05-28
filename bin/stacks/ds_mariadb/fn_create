@@ -97,7 +97,9 @@ stack_ds_mariadb_fn_create(){
   #if [ ! -f $DS_MARIADB_PATH/.env ];then
     stack_ds_mariadb_fn_create_env
   #fi
-
+  
+  chown -R dockserve:dockserve $STACKDIR
+  
   docker-compose --env-file "$STACKDIR/.env" -f "$STACKDIR/docker-compose.yml" up -d
 
   info "ds-mariadb was setup."
