@@ -69,7 +69,7 @@ stack_ds_traefik_fn_compose(){
    echo "      - /var/run/docker.sock:/var/run/docker.sock:ro" >>$STACKDIR/docker-compose.yml
    echo "      - ./config/traefik.yml:/traefik.yml:ro" >>$STACKDIR/docker-compose.yml
    echo "      - ./config/:/config.yml:ro" >>$STACKDIR/docker-compose.yml
-   echo "      - ds-acme-certs:/acme.json" >>$STACKDIR/docker-compose.yml
+   echo "      - ds-acme-certs:/acmedata" >>$STACKDIR/docker-compose.yml
    echo "    command:" >>$STACKDIR/docker-compose.yml
    echo "      - \"--log.level=ERROR\" " >>$STACKDIR/docker-compose.yml
 
