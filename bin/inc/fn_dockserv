@@ -16,6 +16,7 @@ dockserv_uninstall_ds_mariadb() {
   HOSTNAMES=$(hostname)
 
   dockserv_remove "${HOME}/.ds_mariadb"
+  docker volume rm ds_mariadb_ds-mariadb-data
 
 }
 
@@ -41,9 +42,7 @@ dockserv_install_ds_traefik() {
 
 dockserv_install() {
   info "inc/fn_dockserv - dockserv_ install"
-
-
-
+  
   if [ ! -f ~/.ssh/.dockserv ]; then
     notice "For the backupfunctionality to work, a SSH connection is required."
 
@@ -116,4 +115,5 @@ dockserv_uninstall() {
 
   dockserv_uninstall_ds_traefik
   dockserv_uninstall_ds_mariadb
+
 }

@@ -27,7 +27,7 @@ stack_ds_mariadb_fn_create_env(){
   # APPLICATION SPECIFIC
   DB_ROOT_PASSWORD=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-16};echo;)
   echo "DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD">$STACKDIR/.env
-  #echo "DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD"
+  
 
 
   # DATABASE RELATED
@@ -94,13 +94,22 @@ stack_ds_mariadb_fn_create(){
   compose_document "$STACKDIR/docker-compose.yml"
   stack_ds_mariadb_compose "$STACKDIR/docker-compose.yml"
 
-  #if [ ! -f $DS_MARIADB_PATH/.env ];then
+  if [ ! -f $DS_MARIADB_PATH/.env ];then
+    info " [ ! -f $DS_MARIADB_PATH/.env ] "
     stack_ds_mariadb_fn_create_env
-  #fi
+  fi
   
   chown -R dockserve:dockserve $STACKDIR
   
   docker-compose --env-file "$STACKDIR/.env" -f "$STACKDIR/docker-compose.yml" up -d
+
+
+  info "FYI: DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD"
+  info "Secure the database using '/usr/bin/mariadb-secure-installation'"
+  info "Answer the script with : $DB_ROOT_PASSWORD n n y n y y"
+  sleep 5
+
+  docker exec -it ds-mariadb /usr/bin/mariadb-secure-installation
 
   info "ds-mariadb was setup."
 

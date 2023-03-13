@@ -20,6 +20,7 @@ sudo tar -zxvf /tmp/dockserv.tar.gz --overwrite --strip-components=1 --directory
 
 #sudo chown -R 
 
+#exit
 
 
 
@@ -35,8 +36,8 @@ sudo tar -zxvf /tmp/dockserv.tar.gz --overwrite --strip-components=1 --directory
 chmod +x /usr/lib/dockserv/bin/dockserv
 
 
-#echo "PATH=\"$PATH:/usr/lib/dockserv/bin\""> /tmp/environment
-#sudo cp -f /tmp/environment /etc/environment
+echo "PATH=\"$PATH:/usr/lib/dockserv/bin\""> /tmp/environment
+sudo cp -f /tmp/environment /etc/environment
 
 # Create softlinks so binary is accessible
 sudo ln -s /usr/lib/dockserv/bin/dockserv /usr/bin/dockserv

@@ -182,7 +182,7 @@ dockserv_create(){
 
 #
 
-    docker-compose --env-file "$STACKDIR/.env" -f $STACKDIR/docker-compose.yml up -d
+    docker compose --env-file "$STACKDIR/.env" -f $STACKDIR/docker-compose.yml up -d
 
     notice "Finished. ${DOCKSERVE_STACK} created in ${STACKDIR}"
 }

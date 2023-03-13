@@ -13,6 +13,7 @@ stack_ds_mariadb_compose(){
   echo "      - ds-mariadb-data:/var/lib/mysql">>$STACKDIR/docker-compose.yml
   echo "    environment:">>$STACKDIR/docker-compose.yml
   echo "      - MYSQL_ROOT_PASSWORD=\${DB_ROOT_PASSWORD}">>$STACKDIR/docker-compose.yml
+  echo "      - MARIADB_ROOT_PASSWORD=\${DB_ROOT_PASSWORD}">>$STACKDIR/docker-compose.yml
 
   compose_loggingblock "$STACKDIR/docker-compose.yml" >>$STACKDIR/docker-compose.yml
 
