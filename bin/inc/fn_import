@@ -14,7 +14,7 @@ import_backup (){
   tar -zxf $IMPORTFILE -C $STACKDIR .
 
   # Create the stack witout starting it.
-  docker-compose --env-file "$STACKDIR/.env" -f "$STACKDIR/docker-compose.yml" up --no-start
+  docker compose --project-directory "$STACKDIR" up --no-start
 
 
   ##################################################################
@@ -92,6 +92,6 @@ source $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_restore
 
 
 
-  docker-compose --env-file "$STACKDIR/.env" -f "$STACKDIR/docker-compose.yml"  up -d
+  docker compose --project-directory "$STACKDIR"  up -d
 
 }

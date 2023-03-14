@@ -101,7 +101,7 @@ stack_ds_mariadb_fn_create(){
   
   chown -R dockserve:dockserve $STACKDIR
   
-  docker-compose --env-file "$STACKDIR/.env" -f "$STACKDIR/docker-compose.yml" up -d
+  docker compose --project-directory "$STACKDIR" up -d
 
 
   info "FYI: DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD"
