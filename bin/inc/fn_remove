@@ -31,9 +31,16 @@ dockserv_remove(){
 
   
   docker compose --project-directory "$REMOVEPATH" down
+
   info "volume prune"
+  info "VolumeName=${STACKNAME}_appdata"
+
+  docker volume rm -f "${STACKNAME}_appdata" >/dev/null
+  
   docker volume prune -f  >/dev/null
   docker container prune -f>/dev/null
+  
+  
 
   if [ "$DB_SERVER" == "none" ]; then
     info "No db to remove"

@@ -12,7 +12,7 @@ dockserv_uninstall_ds_traefik() {
 dockserv_uninstall_ds_mariadb() {
   info "dockserv_uninstall_ds_traefik()"
   #STACKNAME=ds_mariadb
-  #STACKDIR=${HOME}/.${STACKNAME}
+  info "stackname=${STACKNAME}"
   HOSTNAMES=$(hostname)
 
   dockserv_remove "${HOME}/.ds_mariadb"
@@ -114,7 +114,7 @@ echo "DOCKSERVE_LE_EMAIL $DOCKSERVE_LE_EMAIL"
 dockserv_uninstall() {
   info "inc/dn_dockserv - dockserv_uninstall"
   echo "INFO: Uninstalling dockserv "
-  
+
   docker exec ds-crowdsec cscli bouncers delete traefik-bouncer
   dockserv_uninstall_ds_traefik
   dockserv_uninstall_ds_mariadb
