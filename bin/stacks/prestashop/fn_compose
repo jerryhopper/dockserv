@@ -3,13 +3,13 @@
 
 
 stack_prestashop_fn_compose () {
-
+   # 1.7.8.3-apache
 
    echo "  ">>$STACKDIR/docker-compose.yml
    echo "  # " >>$STACKDIR/docker-compose.yml
    echo "  ###############################################" >>$STACKDIR/docker-compose.yml
    echo "  prestashop:" >>$STACKDIR/docker-compose.yml
-   echo "    image: prestashop/prestashop:1.7.8.3-apache" >>$STACKDIR/docker-compose.yml
+   echo "    image: prestashop/prestashop:8.0.1-apache" >>$STACKDIR/docker-compose.yml
    echo "    container_name: \${STACKNAME}_web" >>$STACKDIR/docker-compose.yml
    echo "    restart: always" >>$STACKDIR/docker-compose.yml
    echo "    networks:" >>$STACKDIR/docker-compose.yml
