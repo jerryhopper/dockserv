@@ -17,7 +17,7 @@ curl -s https://raw.githubusercontent.com/jerryhopper/dockserv/master/setup.sh |
 
 ### Usage
 
-
+<pre>
 Usage: dockserv <options>
 
  dockserv [-c <app>] [-b] [-d <folder>] [-R]
@@ -34,12 +34,14 @@ Usage: dockserv <options>
    dockserv uninstall <-F>
 
    dockserv downloadbackup  - Allows downloading backupfiles from backup archive
+</pre>
 
 
+<pre>
 dockserv -d /some/location/some/nginx -c nginx  -h nginx.local
 dockserv -d /some/location -c swoole74  -h localhost
 dockserv -d /some/location/some/wordpress -c wordpress  -h wordpress.local
 dockserv -d /some/location/some/prestashop -c prestashop  -h prestashop.local
-
+</pre>
 
 
