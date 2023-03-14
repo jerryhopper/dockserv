@@ -17,7 +17,9 @@ dockserv_uninstall_ds_mariadb() {
 
   dockserv_remove "${HOME}/.ds_mariadb"
   docker volume rm ds_mariadb_ds-mariadb-data
-
+  docker volume rm ds_traefik_ds-acme-certs
+  docker volume rm ds_traefik_ds-crowdsec-config
+  docker volume rm ds_traefik_ds-crowdsec-db
 }
 
 dockserv_install_ds_mariadb() {
@@ -112,7 +114,8 @@ echo "DOCKSERVE_LE_EMAIL $DOCKSERVE_LE_EMAIL"
 dockserv_uninstall() {
   info "inc/dn_dockserv - dockserv_uninstall"
   echo "INFO: Uninstalling dockserv "
-
+  
+  docker exec ds-crowdsec cscli bouncers delete traefik-bouncer
   dockserv_uninstall_ds_traefik
   dockserv_uninstall_ds_mariadb
 

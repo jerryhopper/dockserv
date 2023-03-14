@@ -97,6 +97,8 @@ stack_ds_traefik_fn_create(){
     # Create Crowdsec key if not exist.
     if [ ! -f $STACKDIR/crowdsec.txt ] ;then
       info "Create Crowdsec key"
+      # Remove bouncer if already exists.
+      docker exec ds-crowdsec cscli bouncers delete traefik-bouncer>/dev/null
       docker exec ds-crowdsec cscli bouncers add traefik-bouncer>$STACKDIR/crowdsec.txt
     fi
 
