@@ -92,7 +92,7 @@ stack_ds_traefik_fn_create(){
 
     # Setup the stack
     info "Setting up the stack"
-    docker compose --project-directory $STACKDIR up -d
+    docker compose --project-directory "$STACKDIR" up -d
 
     # Create Crowdsec key if not exist.
     if [ ! -f $STACKDIR/crowdsec.txt ] ;then
@@ -104,7 +104,7 @@ stack_ds_traefik_fn_create(){
 
     TRAEFIC_BOUNCER_KEY=$(sed '3q;d' $STACKDIR/crowdsec.txt| xargs)
     echo "Traefik bouncer key: '$TRAEFIC_BOUNCER_KEY'"
-    docker compose --project-directory $STACKDIR down
+    docker compose --project-directory "$STACKDIR" down
 
     # Create docker-compose.
     compose_document    "$STACKDIR/docker-compose.yml"
@@ -112,7 +112,7 @@ stack_ds_traefik_fn_create(){
 
     chown -R dockserve:dockserve $STACKDIR
 
-    docker compose --project-directory $STACKDIR up -d
+    docker compose --project-directory "$STACKDIR" up -d
 
     echo "ds-traefik was setup."
 

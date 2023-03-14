@@ -29,11 +29,8 @@ dockserv_remove(){
   # DB_USER
   # DB_NAME
 
-  info "REMOVEPATH=$REMOVEPATH"
-
-  ##exit
-  info "docker compose --env-file '$REMOVEPATH/.env' --project-directory $REMOVEPATH down"
-  docker compose --env-file "$REMOVEPATH/.env" --project-directory $REMOVEPATH down
+  
+  docker compose --project-directory "$REMOVEPATH" down
   info "volume prune"
   docker volume prune -f  >/dev/null
   docker container prune -f>/dev/null

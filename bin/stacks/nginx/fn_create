@@ -61,7 +61,7 @@ stack_nginx_fn_create_env(){
 
 stack_nginx_fn_define(){
 
-    DOCKSERVE_STACK=nginx
+    #DOCKSERVE_STACK=nginx
     DOCKSERVE_BACKUP_FOLDER=/usr/share/nginx/html
     DOCKSERVE_DB=false
 

@@ -56,7 +56,7 @@ stack_swoole74_fn_create_env(){
 
 stack_swoole74_fn_define(){
 
-    DOCKSERVE_STACK=swoole74
+    #DOCKSERVE_STACK=swoole74
     DOCKSERVE_BACKUP_FOLDER=/var/app
     DOCKSERVE_DB=true
     DOCKSERVE_STACKPORT=9501
