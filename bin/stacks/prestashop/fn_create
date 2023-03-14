@@ -55,8 +55,6 @@ stack_prestashop_fn_create_env(){
 
 }
 stack_prestashop_fn_define(){
-
-    DOCKSERVE_STACK=prestashop
     DOCKSERVE_BACKUP_FOLDER=/var/www/html
     DOCKSERVE_DB=true
     echo "stack_${DOCKSERVE_STACK}_fn_define()"
@@ -118,10 +116,10 @@ stack_prestashop_fn_create(){
     echo " database password: $DB_PASSWD"
     echo "";
     echo "After finishing the setup, manually remove the install folder using:";
-    echo " docker exec -it ${$PROJECTNAME}_web rm -rf /var/www/html/install"
+    echo " docker exec -it ${PROJECTNAME}_web rm -rf /var/www/html/install"
     echo ""
     echo "And rename the Admin folder using:"
-    echo " docker exec -it ${$PROJECTNAME}_web mv -f /var/www/html/admin /var/www/html/admin456"
+    echo " docker exec -it ${PROJECTNAME}_web mv -f /var/www/html/admin /var/www/html/admin456"
     echo "---------------------------------------------------------------------------"
 
   fi
