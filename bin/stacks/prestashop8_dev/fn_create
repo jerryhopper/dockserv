@@ -1,0 +1,146 @@
+#
+# STACK CREATION
+#
+# required function:  stack_ds_<STACKNAME>_fn_create
+#
+# Variables known:
+#
+# $DS_SRCPATH
+# $STACKDIR
+# $STACKNAME
+# $HOSTNAMES HOSTNAMES = array!
+# $HOSTNAME0
+# $HOSTNAME1
+
+# location  "$DS_SRCPATH/stacks/$STACKNAME/fn_create"
+#
+
+
+source $DS_SRCPATH/inc/fn_compose
+source $DS_SRCPATH/inc/fn_database
+
+source $DS_SRCPATH/stacks/$STACKNAME/fn_compose
+
+
+
+stack_prestashop_fn_create_env(){
+
+  #if [ ! -f "$STACKDIR/.env" ]; then
+
+
+    info "Creating .ENV file."
+
+    # Create .env
+    echo "STACKNAME=$PROJECTNAME">$STACKDIR/.env
+
+    echo "HOSTNAME0=$HOSTNAME0">>$STACKDIR/.env
+    echo "HOSTNAME1=$HOSTNAME1">>$STACKDIR/.env
+
+    # DATABASE RELATED
+    echo "DB_SERVER=mariadb">>$STACKDIR/.env
+    echo "DB_USER=$DB_USER">>$STACKDIR/.env
+    echo "DB_PASSWD=$DB_PASSWD">>$STACKDIR/.env
+    echo "DB_NAME=$DB_NAME">>$STACKDIR/.env
+
+    # APPLICATION SPECIFIC
+    echo "PS_INSTALL_AUTO=0">>$STACKDIR/.env
+    echo "PS_ENABLE_SSL=1">>$STACKDIR/.env
+
+    # DOCKSERVE INFO
+    #echo "DOCKSERVE_STACK=prestashop">>$STACKDIR/.env
+    #echo "DOCKSERVE_BACKUP_FOLDER=/var/www/html">>$STACKDIR/.env
+    #echo "DOCKSERVE_BACKUP_EXTFOLDER=/public_html">>$STACKDIR/.env
+
+  #fi
+
+}
+stack_prestashop_fn_define(){
+    DOCKSERVE_BACKUP_FOLDER=/var/www/html
+    DOCKSERVE_DB=true
+    echo "stack_${DOCKSERVE_STACK}_fn_define()"
+}
+
+stack_prestashop_fn_create(){
+    echo "stack_prestashop_fn_create()"
+
+    #echo "PROJECTNAME= $PROJECTNAME"
+    #echo "STACKDIR= $STACKDIR"
+    #echo "HOSTNAME0= $HOSTNAME0"
+    #echo "HOSTNAME1= $HOSTNAME1"
+
+    #echo "DB_USER=$DB_USER"
+    #echo "DB_PASSWD=$DB_PASSWD"
+    #echo "DB_NAME=$DB_NAME"
+
+    #echo "CONTAINERNAME=$CONTAINERNAME"
+
+    # Values for .env
+    #DOCKSERVE_STACK=prestashop
+    #DOCKSERVE_BACKUP_FOLDER=/var/www/html
+    #DOCKSERVE_DB=true
+
+    #echo $HOSTNAMES
+
+#exit
+
+
+
+
+
+  # Create .env if not exists.
+  #################################################################################
+  #stack_prestashop_fn_create_env
+  #compose_dotenv
+
+
+# Create docker-compose.
+  compose_document "$STACKDIR/docker-compose.yml"
+
+  "stack_${DOCKSERVE_STACK}_fn_compose" "$STACKDIR/docker-compose.yml"
+
+
+  # Create needed directory
+  #if [ ! -d $FOLDERNAME/public_html  ];then
+  #  mkdir $FOLDERNAME/public_html
+  #fi
+
+  if [ ! -f $STACKDIR/public_html/index.php ]; then
+    echo ""
+    echo "---------------------------------------------------------------------------"
+    echo "Prestashop additional installation instructions:"
+    echo "This is is a fresh prestashop instance. The installation needs to be completed via the web."
+    echo "Finalize the installation via: http(s)://$HOSTNAME0"
+    echo " database server: database"
+    echo " database name: $DB_NAME"
+    echo " database user: $DB_USER"
+    echo " database password: $DB_PASSWD"
+    echo "";
+    echo "After finishing the setup, manually remove the install folder using:";
+    echo " docker exec -it ${PROJECTNAME}_web rm -rf /var/www/html/install"
+    echo ""
+    echo "And rename the Admin folder using:"
+    echo " docker exec -it ${PROJECTNAME}_web mv -f /var/www/html/admin /var/www/html/admin456"
+    echo "---------------------------------------------------------------------------"
+
+  fi
+
+  compose_traefik_labels "$STACKDIR/docker-compose.yml" "${PROJECTNAME}" "${HOSTNAME0}" "${HOSTNAME1}" "ssl"
+
+  # Add custom label.
+  #echo "      - dockserv.backup.folder=/var/www/html">>$FOLDERNAME/docker-compose.yml
+  #echo "      - dockserv.backup.extfolder=./public_html">>$FOLDERNAME/docker-compose.yml
+
+  echo ""
+  echo "volumes:" >>$STACKDIR/docker-compose.yml
+  echo "  appdata:" >>$STACKDIR/docker-compose.yml
+  echo ""
+
+  compose_networks "$STACKDIR/docker-compose.yml"
+
+  #cat "$STACKDIR/docker-compose.yml"
+
+  #cat "$STACKDIR/.env"
+
+
+
+}

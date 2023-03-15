@@ -1,0 +1,99 @@
+#!/bin/bash
+
+
+
+docker_exec_mysql_query(){
+  docker exec -i ds-mariadb mysql --protocol=TCP --host mariadb -u${DB_USER} -p${DB_PASSWD} --default_character_set utf8 ${DB_NAME} -e "$1"
+}
+
+set_prestashop_ssl(){
+   if [ "$1" == "on" ];then
+     docker_exec_mysql_query "UPDATE ps_configuration SET value = '1' WHERE ps_configuration.name = 'PS_SSL_ENABLED'; UPDATE ps_configuration SET value = '1' WHERE ps_configuration.name = 'PS_SSL_ENABLED_EVERYWHERE';"
+     echo "SSL Enabled."
+     #exit
+   fi
+   if [ "$1" == "off" ];then
+     docker_exec_mysql_query "UPDATE ps_configuration SET value = '0' WHERE ps_configuration.name = 'PS_SSL_ENABLED'; UPDATE ps_configuration SET value = '0' WHERE ps_configuration.name = 'PS_SSL_ENABLED_EVERYWHERE';"
+     echo "SSL Disabled."
+     #exit
+   fi
+   #echo "invalid option (on/off)"
+   #exit
+
+}
+
+set_prestashop_shop(){
+   if [ "$1" == "on" ];then
+     docker_exec_mysql_query "UPDATE ps_configuration SET value = '1' WHERE ps_configuration.name = 'PS_SHOP_ENABLE';"
+     echo "Website enabled."
+     #exit
+
+   fi
+   if [ "$1" == "off" ];then
+     docker_exec_mysql_query "UPDATE ps_configuration SET value = '0' WHERE ps_configuration.name = 'PS_SHOP_ENABLE';"
+     echo "Website disabled."
+     #exit
+   fi
+   #echo "invalid option (on/off)"
+   #exit
+
+}
+
+set_prestashop_cache (){
+   if [ "$1" == "on" ];then
+     #
+     docker_exec_mysql_query "UPDATE ps_configuration SET value = '1' WHERE ps_configuration.name = 'PS_LAYERED_CACHE_ENABLED';"
+     docker_exec_mysql_query "UPDATE ps_configuration SET value = '1' WHERE ps_configuration.name = 'PS_SMARTY_CACHE';"
+     echo "PS_LAYERED_CACHE_ENABLED = 1"
+     #exit
+
+   fi
+   if [ "$1" == "off" ];then
+     docker_exec_mysql_query "UPDATE ps_configuration SET value = '0' WHERE ps_configuration.name = 'PS_LAYERED_CACHE_ENABLED';"
+     docker_exec_mysql_query "UPDATE ps_configuration SET value = '0' WHERE ps_configuration.name = 'PS_SMARTY_CACHE';"
+     echo "PS_LAYERED_CACHE_ENABLED = 0"
+     #exit
+   fi
+   #echo "invalid option (on/off)"
+   #exit
+
+}
+
+set_prestashop_rewrite (){
+
+  if [ "$1" == "on" ];then
+    docker_exec_mysql_query "UPDATE ps_configuration SET value = '1' WHERE ps_configuration.name = 'PS_REWRITING_SETTINGS';"
+    echo "Url rewrite enabled."
+    #exit
+  fi
+  if [ "$1" == "off" ];then
+    docker_exec_mysql_query "UPDATE ps_configuration SET value = '0' WHERE ps_configuration.name = 'PS_REWRITING_SETTINGS';"
+    echo "Url rewrite disabled."
+    #exit
+
+  fi
+   #echo "invalid option (on/off)"
+   #exit
+
+
+}
+
+set_prestashop_domain (){
+
+  docker_exec_mysql_query "UPDATE ps_configuration SET value = '${HOSTNAME}' WHERE ps_configuration.name = 'PS_SHOP_DOMAIN';UPDATE ps_configuration SET value = '${HOSTNAME}' WHERE ps_configuration.name = 'PS_SHOP_DOMAIN_SSL';UPDATE ps_shop_url SET domain = '${HOSTNAME}' WHERE id_shop_url = 1;UPDATE ps_shop_url SET domain_ssl = '${HOSTNAME}' WHERE id_shop_url = 1;"
+  echo "Domain set to ${HOSTNAME}";
+
+}
+
+
+clear_prestashop_cache (){
+
+  echo "${STACKPATH}${DOCKSERVE_BACKUP_EXTFOLDER}/var/cache"
+  if [ -d "${STACKPATH}${DOCKSERVE_BACKUP_EXTFOLDER}/var/cache" ]; then
+    rm -rf "${STACKPATH}${DOCKSERVE_BACKUP_EXTFOLDER}/var/cache/prod"
+    rm -rf "${STACKPATH}${DOCKSERVE_BACKUP_EXTFOLDER}/var/cache/dev"
+    echo "Cache cleared.";
+    #exit
+  fi
+
+}

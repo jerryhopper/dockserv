@@ -1,0 +1,31 @@
+
+
+
+
+stack_prestashop_fn_compose () {
+   # 1.7.8.3-apache
+
+   echo "  ">>$STACKDIR/docker-compose.yml
+   echo "  # " >>$STACKDIR/docker-compose.yml
+   echo "  ###############################################" >>$STACKDIR/docker-compose.yml
+   echo "  prestashop:" >>$STACKDIR/docker-compose.yml
+   echo "    image: prestashop/prestashop-git:8.0" >>$STACKDIR/docker-compose.yml
+   echo "    container_name: \${STACKNAME}_web" >>$STACKDIR/docker-compose.yml
+   echo "    restart: always" >>$STACKDIR/docker-compose.yml
+   echo "    networks:" >>$STACKDIR/docker-compose.yml
+   echo "      ds-proxy-net:" >>$STACKDIR/docker-compose.yml
+   echo "    volumes:" >>$STACKDIR/docker-compose.yml
+   echo "      - appdata:/var/www/html" >>$STACKDIR/docker-compose.yml
+   echo "    environment:" >>$STACKDIR/docker-compose.yml
+   echo "      - DB_SERVER=\${DB_SERVER}" >>$STACKDIR/docker-compose.yml
+   echo "      - DB_USER=\${DB_USER}" >>$STACKDIR/docker-compose.yml
+   echo "      - DB_PASSWD=\${DB_PASSWD}" >>$STACKDIR/docker-compose.yml
+   echo "      - DB_NAME=\${DB_NAME}" >>$STACKDIR/docker-compose.yml
+   echo "      - PS_INSTALL_AUTO=0" >>$STACKDIR/docker-compose.yml
+   echo "      - PS_ENABLE_SSL=0" >>$STACKDIR/docker-compose.yml
+   compose_loggingblock "$STACKDIR/docker-compose.yml" >>$STACKDIR/docker-compose.yml
+   echo "    labels:" >>$STACKDIR/docker-compose.yml
+
+
+
+}
