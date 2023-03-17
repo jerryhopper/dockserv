@@ -23,7 +23,7 @@ source $DS_SRCPATH/stacks/$STACKNAME/fn_compose
 
 
 
-stack_prestashop_fn_create_env(){
+stack_prestashop8_dev_fn_create_env(){
 
   #if [ ! -f "$STACKDIR/.env" ]; then
 
@@ -54,13 +54,13 @@ stack_prestashop_fn_create_env(){
   #fi
 
 }
-stack_prestashop_fn_define(){
+stack_prestashop8_dev_fn_define(){
     DOCKSERVE_BACKUP_FOLDER=/var/www/html
     DOCKSERVE_DB=true
     echo "stack_${DOCKSERVE_STACK}_fn_define()"
 }
 
-stack_prestashop_fn_create(){
+stack_prestashop8_dev_fn_create(){
     echo "stack_prestashop_fn_create()"
 
     #echo "PROJECTNAME= $PROJECTNAME"
@@ -120,6 +120,9 @@ stack_prestashop_fn_create(){
     echo ""
     echo "And rename the Admin folder using:"
     echo " docker exec -it ${PROJECTNAME}_web mv -f /var/www/html/admin /var/www/html/admin456"
+    echo ""
+    echo ""
+    echo " docker exec -it ${PROJECTNAME}_web mkdir /var/www/html/themes/devclassic && /var/www/html/themes/classic /var/www/html/themes/devclassic "
     echo "---------------------------------------------------------------------------"
 
   fi

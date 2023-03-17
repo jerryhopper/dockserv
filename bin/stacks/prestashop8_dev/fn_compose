@@ -2,9 +2,9 @@
 
 
 
-stack_prestashop_fn_compose () {
+stack_prestashop8_dev_fn_compose () {
    # 1.7.8.3-apache
-
+   mkdir "$STACKDIR/html"
    echo "  ">>$STACKDIR/docker-compose.yml
    echo "  # " >>$STACKDIR/docker-compose.yml
    echo "  ###############################################" >>$STACKDIR/docker-compose.yml
@@ -16,6 +16,7 @@ stack_prestashop_fn_compose () {
    echo "      ds-proxy-net:" >>$STACKDIR/docker-compose.yml
    echo "    volumes:" >>$STACKDIR/docker-compose.yml
    echo "      - appdata:/var/www/html" >>$STACKDIR/docker-compose.yml
+   echo "      - ./html:/var/www/_html" >>$STACKDIR/docker-compose.yml
    echo "    environment:" >>$STACKDIR/docker-compose.yml
    echo "      - DB_SERVER=\${DB_SERVER}" >>$STACKDIR/docker-compose.yml
    echo "      - DB_USER=\${DB_USER}" >>$STACKDIR/docker-compose.yml

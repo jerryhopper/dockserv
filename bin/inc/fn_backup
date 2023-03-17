@@ -123,8 +123,8 @@ dockserv_backup(){
     echo "WARNING: No key found in ~/.ssh/id_rsa "
     echo "WARNING: Upload is disabled."
   else
-    #info "uploading.."
-    dockserv_upload_backup "${BACKUPFILENAME}"
+    info "disabled upload.."
+    #dockserv_upload_backup "${BACKUPFILENAME}"
   fi
 
 

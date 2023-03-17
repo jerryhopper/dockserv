@@ -7,16 +7,16 @@ source $DS_SRCPATH/stacks/$DOCKSERVE_STACK/fn_app_specific
 
 
 
-stack_prestashop_backup_fn_backup_before(){
+stack_prestashop8_dev_backup_fn_backup_before(){
   info "stack_prestashop_backup_fn_backup_before"
   #echo $DS_SRCPATH/stacks/$DO/fn_app_specific
   set_prestashop_shop "off"
 }
-stack_prestashop_backup_fn_backup_after(){
+stack_prestashop8_dev_backup_fn_backup_after(){
   info "stack_prestashop_backup_fn_backup_after"
   set_prestashop_shop "on"
 }
 
-stack_prestashop_backup_fn_backup(){
+stack_prestashop8_dev_backup_fn_backup(){
   info "stack_prestashop_backup_fn_backup"
 }

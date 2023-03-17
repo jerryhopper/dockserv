@@ -29,8 +29,8 @@ dockserv_remove(){
   # DB_USER
   # DB_NAME
 
-  
-  docker compose --project-directory "$REMOVEPATH" down
+  info "docker compose --project-directory $REMOVEPATH down"
+  docker compose --project-directory "$REMOVEPATH" down || echo "Soft-fail, continuing..."
 
   info "volume prune"
   info "VolumeName=${STACKNAME}_appdata"
